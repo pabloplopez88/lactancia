@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606061021 -->
+<!-- v202606061131 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -119,6 +119,9 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 svg.chart{display:block;overflow:visible}
 .chart-legend{display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--mid);align-items:center}
 .legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.summary-row{display:flex;gap:10px;margin-bottom:0}
+.summary-row .summary-card{flex:1;margin-bottom:0}
+.summary-row .summary-card.mini{min-width:0}
 #proxima-banner{
   background:#fff8f2;border:1px solid #e0c8b0;border-radius:12px;
   padding:10px 14px;margin-bottom:14px;
@@ -191,8 +194,6 @@ svg.chart{display:block;overflow:visible}
       </div>
     </div>
 
-    <button class="manual-btn" onclick="openModal()">✏️ Cargar toma a mano</button>
-
     <div id="proxima-banner">
       <div>
         <div class="pb-label">Próxima toma antes de</div>
@@ -201,12 +202,21 @@ svg.chart{display:block;overflow:visible}
       <div style="font-size:24px">🕐</div>
     </div>
 
-    <div class="summary-card" id="ayer-card" style="display:none">
-      <div class="section-label">Resumen de ayer</div>
-      <div class="stats">
-        <div class="stat"><div class="val" id="stat-ayer-tomas">0</div><div class="key">Tomas</div></div>
-        <div class="stat"><div class="val" id="stat-ayer-min">0</div><div class="key">Min/toma</div></div>
-        <div class="stat"><div class="val" id="stat-ayer-sides">0/0</div><div class="key">Izq/Der</div></div>
+    <div class="summary-row" id="summary-row" style="display:none;margin-bottom:14px">
+      <div class="summary-card" id="ayer-card">
+        <div class="section-label">Ayer</div>
+        <div class="stats">
+          <div class="stat"><div class="val" id="stat-ayer-tomas">0</div><div class="key">Tomas</div></div>
+          <div class="stat"><div class="val" id="stat-ayer-sides">0/0</div><div class="key">Izq/Der</div></div>
+          <div class="stat"><div class="val" id="stat-ayer-min">0</div><div class="key">Min/toma</div></div>
+        </div>
+      </div>
+      <div class="summary-card mini">
+        <div class="section-label">Promedio</div>
+        <div style="text-align:center;padding-top:4px">
+          <div class="val" id="stat-global-avg" style="font-size:28px;font-weight:600;color:var(--accent);font-family:'Lora',serif">0</div>
+          <div style="font-size:10px;color:var(--mid);margin-top:2px">min/día</div>
+        </div>
       </div>
     </div>
 
@@ -222,6 +232,7 @@ svg.chart{display:block;overflow:visible}
     </div>
 
     <div id="subview-tabla" class="subview visible">
+      <button class="manual-btn" onclick="openModal()">✏️ Cargar toma a mano</button>
       <div id="history-table"></div>
     </div>
 
@@ -370,14 +381,24 @@ function renderToday(){
   // Ayer
   const ay=all.filter(s=>s.date===ayer);
   const ayerCard=document.getElementById('ayer-card');
+  // Global avg min/day
+  const allDays=[...new Set(all.map(s=>s.date))];
+  const globalAvg=allDays.length
+    ? Math.round(all.reduce((a,s)=>a+(s.duration||0),0)/60/allDays.length)
+    : 0;
+  document.getElementById('stat-global-avg').textContent=globalAvg;
+
+  const summaryRow=document.getElementById('summary-row');
   if(ay.length){
-    ayerCard.style.display='';
+    summaryRow.style.display='flex';
     document.getElementById('stat-ayer-tomas').textContent=ay.length;
     document.getElementById('stat-ayer-min').textContent=ay.length?Math.round(totalMin(ay)/ay.length):0;
     document.getElementById('stat-ayer-sides').textContent=
       `${ay.filter(s=>s.side==='izquierda').length}/${ay.filter(s=>s.side==='derecha').length}`;
   } else {
-    ayerCard.style.display='none';
+    // Show only global avg even when no ayer data
+    summaryRow.style.display='flex';
+    document.getElementById('ayer-card').style.display='none';
   }
 
   // Hoy
@@ -485,7 +506,7 @@ function renderTable(){
   const container=document.getElementById('history-table');
   if(!days.length){ container.innerHTML='<div class="empty">No hay registros todavía</div>'; return; }
   container.innerHTML=days.map(day=>{
-    const list=map[day].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+    const list=map[day].sort((a,b)=>new Date(b.startTime)-new Date(a.startTime));
     return `<div class="day-group">
       <div class="day-label">${fmtDate(day)} · ${list.length} tomas · ${totalMin(list)} min</div>
       <div class="sessions-list">${list.map(sessionHTML).join('')}</div>
