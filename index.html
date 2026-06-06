@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606061131 -->
+<!-- v202606061141 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -212,10 +212,10 @@ svg.chart{display:block;overflow:visible}
         </div>
       </div>
       <div class="summary-card mini">
-        <div class="section-label">Promedio</div>
+        <div class="section-label">Global</div>
         <div style="text-align:center;padding-top:4px">
           <div class="val" id="stat-global-avg" style="font-size:28px;font-weight:600;color:var(--accent);font-family:'Lora',serif">0</div>
-          <div style="font-size:10px;color:var(--mid);margin-top:2px">min/día</div>
+          <div style="font-size:10px;color:var(--mid);margin-top:2px">min/toma</div>
         </div>
       </div>
     </div>
@@ -383,8 +383,8 @@ function renderToday(){
   const ayerCard=document.getElementById('ayer-card');
   // Global avg min/day
   const allDays=[...new Set(all.map(s=>s.date))];
-  const globalAvg=allDays.length
-    ? Math.round(all.reduce((a,s)=>a+(s.duration||0),0)/60/allDays.length)
+  const globalAvg=all.length
+    ? Math.round(all.reduce((a,s)=>a+(s.duration||0),0)/60/all.length)
     : 0;
   document.getElementById('stat-global-avg').textContent=globalAvg;
 
