@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606061141 -->
+<!-- v202606061148 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -293,19 +293,6 @@ function totalMin(list){ return Math.round(list.reduce((a,s)=>a+(s.duration||0),
 // ── storage ───────────────────────────────────────────────────────
 function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }catch{ return []; } }
 function save(s){ localStorage.setItem(STORAGE_KEY,JSON.stringify(s)); }
-
-// ── preload ───────────────────────────────────────────────────────
-(function(){
-  let s=load();
-  if(s.find(x=>x.id==='pre-1')) return;
-  function li(date,time){ return new Date(`${date}T${time}:00`).toISOString(); }
-  save([
-    {id:'pre-1',side:'izquierda',date:'2026-06-05',startTime:li('2026-06-05','18:00'),endTime:li('2026-06-05','18:20'),duration:1200},
-    {id:'pre-2',side:'derecha',  date:'2026-06-05',startTime:li('2026-06-05','18:20'),endTime:li('2026-06-05','18:35'),duration:900},
-    {id:'pre-3',side:'derecha',  date:'2026-06-05',startTime:li('2026-06-05','20:55'),endTime:li('2026-06-05','21:20'),duration:1500},
-    ...s
-  ]);
-})();
 
 // ── active session ────────────────────────────────────────────────
 let activeSession=null, timerInterval=null;
