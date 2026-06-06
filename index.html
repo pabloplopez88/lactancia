@@ -121,6 +121,18 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 svg.chart{display:block;overflow:visible}
 .chart-legend{display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--mid);align-items:center}
 .legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+#update-banner{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;
+  background:var(--brown);color:#fff;
+  padding:14px 16px;display:none;
+  align-items:center;justify-content:space-between;
+  font-size:14px;gap:12px;
+}
+#update-banner button{
+  padding:8px 16px;border-radius:20px;border:none;
+  background:var(--accent);color:#fff;font-family:'DM Sans',sans-serif;
+  font-size:13px;cursor:pointer;white-space:nowrap;flex-shrink:0;
+}
 </style>
 </head>
 <body>
@@ -229,6 +241,11 @@ svg.chart{display:block;overflow:visible}
       <button class="btn-save" onclick="saveModal()">Guardar</button>
     </div>
   </div>
+</div>
+
+<div id="update-banner">
+  <span>🆕 Hay una versión nueva</span>
+  <button onclick="applyUpdate()">Actualizar</button>
 </div>
 
 <script>
@@ -556,7 +573,26 @@ function showSubview(name){
 }
 
 // ── service worker ────────────────────────────────────────────────
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+let newWorker = null;
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Nueva versión lista — mostrar banner
+          document.getElementById('update-banner').style.display = 'flex';
+        }
+      });
+    });
+  });
+}
+
+function applyUpdate() {
+  if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
+  window.location.reload();
+}
 
 // ── init ──────────────────────────────────────────────────────────
 renderActive();
