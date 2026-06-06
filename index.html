@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606060922 -->
+<!-- v202606061021 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -299,27 +299,39 @@ function save(s){ localStorage.setItem(STORAGE_KEY,JSON.stringify(s)); }
 // ── active session ────────────────────────────────────────────────
 let activeSession=null, timerInterval=null;
 
+function elapsedSec(){
+  if(!activeSession) return 0;
+  return Math.floor((Date.now() - new Date(activeSession.startTime).getTime()) / 1000);
+}
+
 function startSession(side){
   if(activeSession) return;
-  activeSession={side,startTime:new Date().toISOString(),elapsed:0};
+  activeSession={side, startTime:new Date().toISOString()};
+  // Persist across page reloads / background
+  localStorage.setItem('lactancia_active', JSON.stringify(activeSession));
   renderActive();
-  timerInterval=setInterval(()=>{
-    activeSession.elapsed++;
-    document.getElementById('timer-display').textContent=durStr(activeSession.elapsed);
-  },1000);
+  timerInterval=setInterval(tickTimer, 500);
+}
+
+function tickTimer(){
+  const el=document.getElementById('timer-display');
+  if(el) el.textContent=durStr(elapsedSec());
 }
 
 function stopSession(){
   if(!activeSession) return;
   clearInterval(timerInterval);
+  const endTime=new Date().toISOString();
+  const duration=elapsedSec();
   const s={
     id:Date.now().toString(), side:activeSession.side,
     date:localDateStr(new Date(activeSession.startTime)),
-    startTime:activeSession.startTime, endTime:new Date().toISOString(),
-    duration:activeSession.elapsed
+    startTime:activeSession.startTime, endTime, duration
   };
   const all=load(); all.unshift(s); save(all);
-  activeSession=null; renderActive(); renderToday();
+  activeSession=null;
+  localStorage.removeItem('lactancia_active');
+  renderActive(); renderToday();
 }
 
 function renderActive(){
@@ -331,8 +343,10 @@ function renderActive(){
     document.getElementById('active-label').textContent=
       activeSession.side==='izquierda'?'⬅️ Teta izquierda':'➡️ Teta derecha';
     document.getElementById('active-start').textContent='Inicio: '+fmtTime(activeSession.startTime);
-    document.getElementById('timer-display').textContent=durStr(activeSession.elapsed);
+    document.getElementById('timer-display').textContent=durStr(elapsedSec());
     startArea.style.display='none';
+    clearInterval(timerInterval);
+    timerInterval=setInterval(tickTimer, 500);
   } else {
     card.style.display='none'; startArea.style.display='block'; renderHint();
   }
@@ -627,6 +641,13 @@ function applyUpdate() {
 }
 
 // ── init ──────────────────────────────────────────────────────────
+// Restore in-progress session if app was closed mid-toma
+(function(){
+  try {
+    const saved = localStorage.getItem('lactancia_active');
+    if(saved) activeSession = JSON.parse(saved);
+  } catch(e){}
+})();
 renderActive();
 renderToday();
 </script>

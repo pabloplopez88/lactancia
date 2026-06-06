@@ -1,4 +1,4 @@
-const CACHE = 'lactancia-202606060922';
+const CACHE = 'lactancia-202606061021';
 const FILES = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
