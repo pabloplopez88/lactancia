@@ -175,12 +175,12 @@ svg.chart{display:block;overflow:visible}
 
     <button class="manual-btn" onclick="openModal()">✏️ Cargar toma a mano</button>
 
-    <div class="summary-card">
-      <div class="section-label">Resumen de hoy</div>
+    <div class="summary-card" id="ayer-card" style="display:none">
+      <div class="section-label">Resumen de ayer</div>
       <div class="stats">
-        <div class="stat"><div class="val" id="stat-tomas">0</div><div class="key">Tomas</div></div>
-        <div class="stat"><div class="val" id="stat-min">0</div><div class="key">Minutos</div></div>
-        <div class="stat"><div class="val" id="stat-sides">0/0</div><div class="key">Izq/Der</div></div>
+        <div class="stat"><div class="val" id="stat-ayer-tomas">0</div><div class="key">Tomas</div></div>
+        <div class="stat"><div class="val" id="stat-ayer-min">0</div><div class="key">Minutos</div></div>
+        <div class="stat"><div class="val" id="stat-ayer-sides">0/0</div><div class="key">Izq/Der</div></div>
       </div>
     </div>
 
@@ -315,13 +315,29 @@ function renderHint(){
 }
 
 // ── today ─────────────────────────────────────────────────────────
+function yesterdayStr(){
+  const d=new Date(); d.setDate(d.getDate()-1); return localDateStr(d);
+}
+
 function renderToday(){
-  const all=load(), today=todayStr();
+  const all=load(), today=todayStr(), ayer=yesterdayStr();
+
+  // Ayer
+  const ay=all.filter(s=>s.date===ayer);
+  const ayerCard=document.getElementById('ayer-card');
+  if(ay.length){
+    ayerCard.style.display='';
+    document.getElementById('stat-ayer-tomas').textContent=ay.length;
+    document.getElementById('stat-ayer-min').textContent=totalMin(ay);
+    document.getElementById('stat-ayer-sides').textContent=
+      `${ay.filter(s=>s.side==='izquierda').length}/${ay.filter(s=>s.side==='derecha').length}`;
+  } else {
+    ayerCard.style.display='none';
+  }
+
+  // Hoy
   const ts=all.filter(s=>s.date===today).sort((a,b)=>new Date(b.startTime)-new Date(a.startTime));
-  document.getElementById('stat-tomas').textContent=ts.length;
-  document.getElementById('stat-min').textContent=totalMin(ts);
-  document.getElementById('stat-sides').textContent=
-    `${ts.filter(s=>s.side==='izquierda').length}/${ts.filter(s=>s.side==='derecha').length}`;
+
   const list=document.getElementById('today-list');
   list.innerHTML=ts.length?ts.map(sessionHTML).join(''):'<div class="empty">Todavía no hay tomas registradas hoy 🌙</div>';
 }
@@ -434,74 +450,92 @@ function renderChart(){
     const list=map[day].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
     return `<div class="chart-day-block">
       <div class="chart-day-label">${fmtDate(day)}</div>
-      <div class="chart-scroll">${buildDayChart(list)}</div>
+      ${buildDayChart(list, 340)}
     </div>`;
   }).join('');
 }
 
-function buildDayChart(sessions){
-  // Real-time x axis: 0h to 24h, scale to pixel width
-  const W = 600;          // total svg width (scrollable)
-  const H = 120;          // svg height
-  const BAR_H = 50;       // bar height
-  const BAR_Y = 20;       // bar top y
-  const AXIS_Y = H - 22;  // x axis y
-  const TICK_H = 5;
-  const LEFT_PAD = 0;
+function buildDayChart(sessions, containerWidth){
+  // Layout constants (in SVG user units = px at 1:1)
+  const VW      = containerWidth || 340; // will be overridden by viewBox + 100% width
+  const YPAD_T  = 8;    // top padding
+  const YPAD_B  = 28;   // bottom (x axis labels)
+  const XPAD_L  = 32;   // left (y axis labels)
+  const XPAD_R  = 6;
+  const PLOT_W  = VW - XPAD_L - XPAD_R;
+  const PLOT_H  = 130;
+  const H       = PLOT_H + YPAD_T + YPAD_B;
+  const AXIS_Y  = YPAD_T + PLOT_H;
 
-  // Find actual time range with padding
-  const starts = sessions.map(s => new Date(s.startTime));
-  const ends   = sessions.map(s => new Date(s.endTime));
-  const minH   = Math.max(0,  Math.min(...starts.map(d=>d.getHours())) - 1);
-  const maxH   = Math.min(24, Math.max(...ends.map(d=>d.getHours() + (d.getMinutes()>0?1:0))) + 1);
-  const rangeMin = minH * 60;
-  const rangeMax = maxH * 60;
-  const totalRange = rangeMax - rangeMin;
+  // Time range for X axis
+  const allMins = sessions.flatMap(s=>[
+    new Date(s.startTime).getHours()*60+new Date(s.startTime).getMinutes(),
+    new Date(s.endTime).getHours()*60+new Date(s.endTime).getMinutes()
+  ]);
+  const minH  = Math.max(0,  Math.floor(Math.min(...allMins)/60) - 0);
+  const maxH  = Math.min(24, Math.ceil(Math.max(...allMins)/60) + 0);
+  const tMin  = minH*60;
+  const tMax  = maxH*60;
+  const tSpan = tMax - tMin;
+
+  // Max duration for Y axis
+  const maxDurMin = Math.max(...sessions.map(s=>s.duration/60), 5);
+  // Round up to nearest 5
+  const yMax = Math.ceil(maxDurMin/5)*5;
 
   function toX(iso){
     const d=new Date(iso);
-    const mins=d.getHours()*60+d.getMinutes();
-    return LEFT_PAD + ((mins - rangeMin) / totalRange) * W;
+    const m=d.getHours()*60+d.getMinutes();
+    return XPAD_L + ((m-tMin)/tSpan)*PLOT_W;
+  }
+  function toBarH(durSec){
+    return Math.max(3, (durSec/60/yMax)*PLOT_H);
+  }
+
+  // Y grid lines + labels (every 5 min up to yMax)
+  let yLines='', yLabels='';
+  const yStep = yMax<=10?2:yMax<=20?5:10;
+  for(let y=0; y<=yMax; y+=yStep){
+    const yPx = YPAD_T + PLOT_H - (y/yMax)*PLOT_H;
+    const col = y===0?'#c8b090':'#e8d8c0';
+    yLines+=`<line x1="${XPAD_L}" y1="${yPx.toFixed(1)}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${yPx.toFixed(1)}" stroke="${col}" stroke-width="${y===0?1.2:0.7}" stroke-dasharray="${y===0?'none':'3,3'}"/>`;
+    yLabels+=`<text x="${(XPAD_L-4).toFixed(1)}" y="${(yPx+3.5).toFixed(1)}" text-anchor="end" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${y}</text>`;
+  }
+  // Y axis label
+  const yAxisLabel=`<text x="7" y="${(YPAD_T+PLOT_H/2).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif" transform="rotate(-90,7,${(YPAD_T+PLOT_H/2).toFixed(1)})">min</text>`;
+
+  // X ticks every hour
+  let xTicks='';
+  for(let h=minH;h<=maxH;h++){
+    const x=XPAD_L+((h*60-tMin)/tSpan)*PLOT_W;
+    if(x<XPAD_L-1||x>XPAD_L+PLOT_W+1) continue;
+    xTicks+=`<line x1="${x.toFixed(1)}" y1="${AXIS_Y}" x2="${x.toFixed(1)}" y2="${(AXIS_Y+4).toFixed(1)}" stroke="#c8b090" stroke-width="1"/>
+    <text x="${x.toFixed(1)}" y="${(AXIS_Y+13).toFixed(1)}" text-anchor="middle" font-size="8.5" fill="#a07850" font-family="DM Sans,sans-serif">${pad(h)}:00</text>`;
   }
 
   // Bars
-  let bars = sessions.map(s=>{
+  let bars=sessions.map(s=>{
     const x1=toX(s.startTime);
-    const x2=toX(s.endTime);
-    const w=Math.max(4, x2-x1);
+    const bh=toBarH(s.duration);
+    const by=YPAD_T+PLOT_H-bh;
+    // bar width: at minimum 6px, max based on duration on x axis
+    const x2raw=toX(s.endTime);
+    const bw=Math.max(6, x2raw-x1);
     const fill=s.side==='izquierda'?'#8fbfd4':'#d48fb8';
     const stroke=s.side==='izquierda'?'#5a9ab8':'#b86898';
-    const label=`${fmtTime(s.startTime)}\n${durStr(s.duration)}`;
-    return `<rect x="${x1.toFixed(1)}" y="${BAR_Y}" width="${w.toFixed(1)}" height="${BAR_H}"
-      rx="5" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-    <text x="${(x1+w/2).toFixed(1)}" y="${(BAR_Y+BAR_H/2-6).toFixed(1)}"
-      text-anchor="middle" font-size="9" fill="${s.side==='izquierda'?'#1a4a5e':'#5e1a4a'}" font-family="DM Sans,sans-serif">
-      ${fmtTime(s.startTime)}</text>
-    <text x="${(x1+w/2).toFixed(1)}" y="${(BAR_Y+BAR_H/2+7).toFixed(1)}"
-      text-anchor="middle" font-size="9" fill="${s.side==='izquierda'?'#1a4a5e':'#5e1a4a'}" font-family="DM Sans,sans-serif">
-      ${durStr(s.duration)}</text>`;
+    const tc=s.side==='izquierda'?'#1a4a5e':'#5e1a4a';
+    // label inside bar if tall enough, otherwise above
+    const labelY = bh>22 ? by+bh-5 : by-3;
+    const durM=Math.round(s.duration/60);
+    return `<rect x="${x1.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>
+    <text x="${(x1+bw/2).toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="8" fill="${tc}" font-family="DM Sans,sans-serif">${durM}m</text>`;
   }).join('');
 
-  // X axis line
-  let axis = `<line x1="${LEFT_PAD}" y1="${AXIS_Y}" x2="${W+LEFT_PAD}" y2="${AXIS_Y}" stroke="#c8b090" stroke-width="1"/>`;
+  // X axis baseline
+  const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="#c8b090" stroke-width="1.2"/>`;
 
-  // Ticks every hour
-  let ticks = '';
-  for(let h=minH; h<=maxH; h++){
-    const mins=h*60;
-    if(mins<rangeMin||mins>rangeMax) continue;
-    const x=LEFT_PAD+((mins-rangeMin)/totalRange)*W;
-    ticks+=`<line x1="${x.toFixed(1)}" y1="${AXIS_Y}" x2="${x.toFixed(1)}" y2="${(AXIS_Y+TICK_H).toFixed(1)}" stroke="#c8b090" stroke-width="1"/>
-    <text x="${x.toFixed(1)}" y="${(AXIS_Y+TICK_H+11).toFixed(1)}"
-      text-anchor="middle" font-size="9" fill="#a07850" font-family="DM Sans,sans-serif">${pad(h)}:00</text>`;
-  }
-
-  // Y axis label (duration) — static guide lines
-  const maxDur = Math.max(...sessions.map(s=>s.duration/60), 10);
-  const yScale = BAR_H / maxDur; // not used for bars (fixed height), just decorative
-
-  return `<svg class="chart" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-    ${bars}${axis}${ticks}
+  return `<svg class="chart" width="100%" viewBox="0 0 ${VW} ${H}" style="display:block">
+    ${yLines}${yLabels}${yAxisLabel}${bars}${baseline}${xTicks}
   </svg>`;
 }
 
