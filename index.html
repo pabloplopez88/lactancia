@@ -12,222 +12,115 @@
 <title>🤱 Lactancia</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
-
 :root {
-  --cream: #fdf6f0;
-  --warm: #e8c4a0;
-  --brown: #5c3d20;
-  --mid: #a07850;
-  --accent: #c4845a;
-  --left-bg: #d4eaf2;
-  --left-border: #8fbfd4;
-  --left-dark: #1a4a5e;
-  --right-bg: #f2d4ea;
-  --right-border: #d48fb8;
-  --right-dark: #5e1a4a;
+  --cream:#fdf6f0; --warm:#e8c4a0; --brown:#5c3d20; --mid:#a07850;
+  --accent:#c4845a; --left-dark:#1a4a5e; --right-dark:#5e1a4a;
+  --left-border:#8fbfd4; --right-border:#d48fb8;
 }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--brown);min-height:100vh;padding-bottom:48px}
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* HEADER */
+header{background:linear-gradient(135deg,#e8c4a0 0%,#f5dfc5 60%,var(--cream) 100%);padding:18px 14px 12px;border-bottom:1px solid #e0c8b0;position:sticky;top:0;z-index:100}
+header .inner{max-width:480px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+header .title-area small{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:1px}
+header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--brown)}
+.tabs{display:flex;gap:5px}
+.tab{padding:6px 13px;border-radius:20px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;background:transparent;color:var(--mid);transition:all .2s}
+.tab.active{background:var(--accent);color:#fff}
 
-body {
-  background: var(--cream);
-  font-family: 'DM Sans', sans-serif;
-  color: var(--brown);
-  min-height: 100vh;
-  padding-bottom: 48px;
-}
+.main{max-width:480px;margin:0 auto;padding:16px 14px}
+.view{display:none}.view.visible{display:block}
 
-header {
-  background: linear-gradient(135deg, #e8c4a0 0%, #f5dfc5 60%, var(--cream) 100%);
-  padding: 20px 16px 14px;
-  border-bottom: 1px solid #e0c8b0;
-  position: sticky; top: 0; z-index: 100;
-}
-header .inner {
-  max-width: 480px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-}
-header .title-area small {
-  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--mid); display: block; margin-bottom: 2px;
-}
-header h1 {
-  font-family: 'Lora', serif; font-size: 24px;
-  font-weight: 400; color: var(--brown);
-}
-.tabs { display: flex; gap: 6px; }
-.tab {
-  padding: 7px 14px; border-radius: 20px; border: none;
-  font-family: 'DM Sans', sans-serif; font-size: 13px;
-  cursor: pointer; background: transparent; color: var(--mid); transition: all 0.2s;
-}
-.tab.active { background: var(--accent); color: #fff; }
-
-.main { max-width: 480px; margin: 0 auto; padding: 18px 14px; }
-.view { display: none; }
-.view.visible { display: block; }
+/* SUBTABS (historial) */
+.subtabs{display:flex;gap:6px;margin-bottom:16px}
+.subtab{flex:1;padding:9px;border-radius:12px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;color:var(--mid);transition:all .2s;text-align:center}
+.subtab.active{background:var(--mid);color:#fff;border-color:var(--mid)}
+.subview{display:none}.subview.visible{display:block}
 
 /* START BUTTONS */
-.start-hint {
-  text-align: center; font-size: 12px; color: var(--mid);
-  margin-bottom: 10px; min-height: 18px;
-}
-.start-hint strong { color: var(--accent); }
-.btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-.btn-side {
-  padding: 22px 10px; border-radius: 18px; border: 2px solid;
-  font-family: 'DM Sans', sans-serif; cursor: pointer;
-  text-align: center; transition: transform 0.1s; line-height: 1.4;
-}
-.btn-side:active { transform: scale(0.96); }
-.btn-side.left { background: linear-gradient(135deg,#c8e4f0,#a8cee0); border-color: var(--left-border); color: var(--left-dark); }
-.btn-side.right { background: linear-gradient(135deg,#f0c8e0,#e0a8cc); border-color: var(--right-border); color: var(--right-dark); }
-.btn-side .emoji { font-size: 28px; display: block; margin-bottom: 5px; }
-.btn-side .label { font-size: 14px; font-weight: 600; display: block; }
-.btn-side .sub { font-size: 11px; opacity: 0.7; margin-top: 3px; display: block; }
+.start-hint{text-align:center;font-size:12px;color:var(--mid);margin-bottom:10px;min-height:18px}
+.start-hint strong{color:var(--accent)}
+.btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.btn-side{padding:20px 10px;border-radius:18px;border:2px solid;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:transform .1s;line-height:1.4}
+.btn-side:active{transform:scale(.96)}
+.btn-side.left{background:linear-gradient(135deg,#c8e4f0,#a8cee0);border-color:var(--left-border);color:var(--left-dark)}
+.btn-side.right{background:linear-gradient(135deg,#f0c8e0,#e0a8cc);border-color:var(--right-border);color:var(--right-dark)}
+.btn-side .emoji{font-size:26px;display:block;margin-bottom:4px}
+.btn-side .label{font-size:14px;font-weight:600;display:block}
+.btn-side .sub{font-size:11px;opacity:.7;margin-top:2px;display:block}
 
-/* ACTIVE SESSION */
-#active-card {
-  border-radius: 18px; padding: 18px; margin-bottom: 16px;
-  display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.10);
-}
-#active-card.left { background: linear-gradient(135deg,#d4eaf2,#b8d8e8); border: 2px solid var(--left-border); }
-#active-card.right { background: linear-gradient(135deg,#f0d4e8,#e8b8d0); border: 2px solid var(--right-border); }
-#active-card .row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-#active-card .badge { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
-#active-card.left .badge { color: #4a7a94; }
-#active-card.right .badge { color: #944a7a; }
-#active-card .side-label { font-size: 19px; font-family: 'Lora', serif; }
-#active-card .start-time { font-size: 12px; color: #6a5040; margin-top: 2px; }
-#timer-display { font-size: 42px; font-family: monospace; font-weight: bold; line-height: 1; text-align: right; }
-#active-card.left #timer-display { color: var(--left-dark); }
-#active-card.right #timer-display { color: var(--right-dark); }
-.timer-unit { font-size: 10px; color: #8a7060; text-align: right; margin-top: 2px; }
-.btn-stop {
-  width: 100%; padding: 13px; border-radius: 12px; border: none;
-  font-family: 'DM Sans', sans-serif; font-size: 15px;
-  font-weight: 500; color: #fff; cursor: pointer;
-}
-#active-card.left .btn-stop { background: #2a6a84; }
-#active-card.right .btn-stop { background: #842a6a; }
+/* ACTIVE */
+#active-card{border-radius:18px;padding:16px;margin-bottom:14px;display:none;box-shadow:0 4px 20px rgba(0,0,0,.10)}
+#active-card.left{background:linear-gradient(135deg,#d4eaf2,#b8d8e8);border:2px solid var(--left-border)}
+#active-card.right{background:linear-gradient(135deg,#f0d4e8,#e8b8d0);border:2px solid var(--right-border)}
+#active-card .row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+#active-card .badge{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
+#active-card.left .badge{color:#4a7a94}#active-card.right .badge{color:#944a7a}
+#active-card .side-label{font-size:18px;font-family:'Lora',serif}
+#active-card .start-time{font-size:12px;color:#6a5040;margin-top:2px}
+#timer-display{font-size:40px;font-family:monospace;font-weight:bold;line-height:1;text-align:right}
+#active-card.left #timer-display{color:var(--left-dark)}#active-card.right #timer-display{color:var(--right-dark)}
+.timer-unit{font-size:10px;color:#8a7060;text-align:right;margin-top:2px}
+.btn-stop{width:100%;padding:12px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;color:#fff;cursor:pointer}
+#active-card.left .btn-stop{background:#2a6a84}#active-card.right .btn-stop{background:#842a6a}
 
 /* SUMMARY */
-.summary-card {
-  background: #fff; border-radius: 16px; padding: 16px;
-  margin-bottom: 16px; border: 1px solid #ead8c8;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-}
-.section-label {
-  font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
-  color: var(--mid); margin-bottom: 10px;
-}
-.stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.stat { text-align: center; }
-.stat .val { font-size: 26px; font-weight: 600; color: var(--accent); font-family: 'Lora', serif; }
-.stat .key { font-size: 10px; color: var(--mid); margin-top: 2px; }
+.summary-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;border:1px solid #ead8c8;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.section-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--mid);margin-bottom:10px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.stat{text-align:center}.stat .val{font-size:24px;font-weight:600;color:var(--accent);font-family:'Lora',serif}.stat .key{font-size:10px;color:var(--mid);margin-top:2px}
 
 /* SESSION CARDS */
-.sessions-list { display: flex; flex-direction: column; gap: 8px; }
-.session-card {
-  display: flex; align-items: center; padding: 11px 12px;
-  border-radius: 14px; gap: 10px;
-}
-.session-card.left { background: linear-gradient(135deg,#e8f4f8,#d4eaf2); border: 1px solid #aacfde; }
-.session-card.right { background: linear-gradient(135deg,#f8e8f4,#f2d4ea); border: 1px solid #deaac9; }
-.session-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
-}
-.session-card.left .session-icon { background: #c0dce8; }
-.session-card.right .session-icon { background: #e8c0d8; }
-.session-info { flex: 1; min-width: 0; }
-.session-info .name { font-size: 13px; font-weight: 600; }
-.session-card.left .session-info .name { color: var(--left-dark); }
-.session-card.right .session-info .name { color: var(--right-dark); }
-.session-info .times { font-size: 11px; color: #7a6050; margin-top: 1px; }
-.session-dur { text-align: right; flex-shrink: 0; }
-.session-dur .dur { font-size: 17px; font-family: monospace; font-weight: bold; }
-.session-card.left .session-dur .dur { color: var(--left-dark); }
-.session-card.right .session-dur .dur { color: var(--right-dark); }
-.session-dur .unit { font-size: 9px; color: #a09080; }
-.card-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
-.btn-icon {
-  background: none; border: none; cursor: pointer;
-  font-size: 15px; padding: 4px 6px; border-radius: 6px;
-  line-height: 1;
-}
-.btn-edit { color: #8a7050; }
-.btn-del { color: #c09080; }
-.btn-edit:active, .btn-del:active { background: rgba(0,0,0,0.07); }
+.sessions-list{display:flex;flex-direction:column;gap:7px}
+.session-card{display:flex;align-items:center;padding:10px 11px;border-radius:13px;gap:9px}
+.session-card.left{background:linear-gradient(135deg,#e8f4f8,#d4eaf2);border:1px solid #aacfde}
+.session-card.right{background:linear-gradient(135deg,#f8e8f4,#f2d4ea);border:1px solid #deaac9}
+.session-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.session-card.left .session-icon{background:#c0dce8}.session-card.right .session-icon{background:#e8c0d8}
+.session-info{flex:1;min-width:0}
+.session-info .name{font-size:13px;font-weight:600}
+.session-card.left .session-info .name{color:var(--left-dark)}.session-card.right .session-info .name{color:var(--right-dark)}
+.session-info .times{font-size:11px;color:#7a6050;margin-top:1px}
+.session-dur{text-align:right;flex-shrink:0}
+.session-dur .dur{font-size:16px;font-family:monospace;font-weight:bold}
+.session-card.left .session-dur .dur{color:var(--left-dark)}.session-card.right .session-dur .dur{color:var(--right-dark)}
+.session-dur .unit{font-size:9px;color:#a09080}
+.card-actions{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
+.btn-icon{background:none;border:none;cursor:pointer;font-size:14px;padding:4px 5px;border-radius:6px;line-height:1}
+.btn-edit{color:#8a7050}.btn-del{color:#c09080}
+.btn-edit:active,.btn-del:active{background:rgba(0,0,0,.07)}
 
-/* MANUAL BUTTON */
-.manual-btn {
-  width: 100%; padding: 11px; border-radius: 12px;
-  border: 1.5px dashed var(--accent); background: transparent;
-  color: var(--accent); font-family: 'DM Sans', sans-serif;
-  font-size: 14px; cursor: pointer; margin-bottom: 16px;
-}
-.manual-btn:active { background: #fde8d8; }
+/* DAY GROUP */
+.day-group{margin-bottom:18px}
+.day-label{font-size:11px;font-weight:600;text-transform:capitalize;letter-spacing:.5px;color:var(--mid);padding:4px 2px 8px;border-bottom:1px solid #e8d8c8;margin-bottom:8px}
 
-.empty {
-  text-align: center; padding: 26px; color: #b09070;
-  background: #fff8f2; border-radius: 12px;
-  border: 1px dashed #e0c8b0; font-size: 14px;
-}
+/* MANUAL BTN */
+.manual-btn{width:100%;padding:10px;border-radius:12px;border:1.5px dashed var(--accent);background:transparent;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;margin-bottom:14px}
+.manual-btn:active{background:#fde8d8}
+.empty{text-align:center;padding:24px;color:#b09070;background:#fff8f2;border-radius:12px;border:1px dashed #e0c8b0;font-size:14px}
 
 /* MODAL */
-.modal-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.45); z-index: 200;
-  align-items: flex-end; justify-content: center;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--cream); border-radius: 24px 24px 0 0;
-  padding: 26px 18px 40px; width: 100%; max-width: 480px;
-}
-.modal h2 { font-family: 'Lora', serif; font-size: 19px; font-weight: 400; margin-bottom: 18px; color: var(--brown); }
-.field { margin-bottom: 14px; }
-.field label { display: block; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mid); margin-bottom: 5px; }
-.field input, .field select {
-  width: 100%; padding: 11px 13px; border-radius: 10px;
-  border: 1.5px solid #e0c8b0; background: #fff;
-  font-family: 'DM Sans', sans-serif; font-size: 15px;
-  color: var(--brown); outline: none;
-}
-.field input:focus, .field select:focus { border-color: var(--accent); }
-.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
-.btn-cancel {
-  padding: 12px; border-radius: 12px; border: 1.5px solid #e0c8b0;
-  background: transparent; font-family: 'DM Sans', sans-serif;
-  font-size: 15px; color: var(--mid); cursor: pointer;
-}
-.btn-save {
-  padding: 12px; border-radius: 12px; border: none;
-  background: var(--accent); font-family: 'DM Sans', sans-serif;
-  font-size: 15px; font-weight: 500; color: #fff; cursor: pointer;
-}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--cream);border-radius:24px 24px 0 0;padding:24px 16px 38px;width:100%;max-width:480px}
+.modal h2{font-family:'Lora',serif;font-size:18px;font-weight:400;margin-bottom:16px;color:var(--brown)}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);margin-bottom:4px}
+.field input,.field select{width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e0c8b0;background:#fff;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--brown);outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.btn-cancel{padding:11px;border-radius:12px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--mid);cursor:pointer}
+.btn-save{padding:11px;border-radius:12px;border:none;background:var(--accent);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;color:#fff;cursor:pointer}
 
-/* HISTORY */
-.day-block { margin-bottom: 10px; }
-.day-header {
-  width: 100%; padding: 13px 16px; border-radius: 14px;
-  border: 1px solid #ead8c8; background: #fff;
-  text-align: left; display: flex; justify-content: space-between;
-  align-items: center; cursor: pointer; font-family: 'DM Sans', sans-serif;
-}
-.day-header.open { border-radius: 14px 14px 0 0; background: #e8c4a0; }
-.day-header .day-title { font-size: 14px; font-weight: 600; text-transform: capitalize; }
-.day-header .day-sub { font-size: 11px; color: var(--mid); margin-top: 2px; }
-.day-header .chevron { font-size: 12px; color: var(--accent); }
-.day-body {
-  display: none; background: #fffaf5;
-  border: 1px solid #ead8c8; border-top: none;
-  border-radius: 0 0 14px 14px; padding: 10px;
-  gap: 8px; flex-direction: column;
-}
-.day-body.open { display: flex; }
+/* CHART */
+.chart-day-block{margin-bottom:28px}
+.chart-day-label{font-size:11px;font-weight:600;text-transform:capitalize;letter-spacing:.5px;color:var(--mid);margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #e8d8c8}
+.chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.chart-wrap{position:relative;padding-left:36px;padding-bottom:22px}
+svg.chart{display:block;overflow:visible}
+.chart-legend{display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--mid);align-items:center}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -246,6 +139,7 @@ header h1 {
 </header>
 
 <div class="main">
+
   <!-- HOY -->
   <div id="view-hoy" class="view visible">
     <div id="active-card">
@@ -296,27 +190,33 @@ header h1 {
 
   <!-- HISTORIAL -->
   <div id="view-historial" class="view">
-    <div class="section-label">Historial por día</div>
-    <div id="history-list"></div>
+    <div class="subtabs">
+      <button class="subtab active" id="subtab-tabla" onclick="showSubview('tabla')">📋 Tabla</button>
+      <button class="subtab" id="subtab-grafico" onclick="showSubview('grafico')">📊 Gráfico</button>
+    </div>
+
+    <div id="subview-tabla" class="subview visible">
+      <div id="history-table"></div>
+    </div>
+
+    <div id="subview-grafico" class="subview">
+      <div class="chart-legend">
+        <div class="legend-dot" style="background:#8fbfd4"></div><span>Teta izquierda</span>
+        <div class="legend-dot" style="background:#d48fb8"></div><span>Teta derecha</span>
+      </div>
+      <div id="history-chart"></div>
+    </div>
   </div>
+
 </div>
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
   <div class="modal">
     <h2 id="modal-title">✏️ Cargar toma</h2>
-    <div class="field">
-      <label>Fecha</label>
-      <input type="date" id="m-date">
-    </div>
-    <div class="field">
-      <label>Hora de inicio</label>
-      <input type="time" id="m-start">
-    </div>
-    <div class="field">
-      <label>Hora de fin</label>
-      <input type="time" id="m-end">
-    </div>
+    <div class="field"><label>Fecha</label><input type="date" id="m-date"></div>
+    <div class="field"><label>Hora de inicio</label><input type="time" id="m-start"></div>
+    <div class="field"><label>Hora de fin</label><input type="time" id="m-end"></div>
     <div class="field">
       <label>Teta</label>
       <select id="m-side">
@@ -336,147 +236,100 @@ const STORAGE_KEY = 'lactancia_v2';
 let editingId = null;
 
 // ── utils ─────────────────────────────────────────────────────────
-function pad(n) { return String(n).padStart(2,'0'); }
-
-function localDateStr(d) {
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function pad(n){ return String(n).padStart(2,'0'); }
+function localDateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function todayStr(){ return localDateStr(new Date()); }
+function fmtTime(iso){ const d=new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function fmtDate(str){
+  const [y,m,d]=str.split('-');
+  return new Date(Number(y),Number(m)-1,Number(d))
+    .toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
 }
-
-function todayStr() { return localDateStr(new Date()); }
-
-function fmtTime(iso) {
-  const d = new Date(iso);
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function fmtDate(str) {
-  const [y,m,d] = str.split('-');
-  return new Date(Number(y), Number(m)-1, Number(d))
-    .toLocaleDateString('es-AR', {weekday:'long', day:'numeric', month:'long'});
-}
-
-function durStr(sec) {
-  return `${pad(Math.floor(sec/60))}:${pad(sec%60)}`;
-}
-
-function totalMin(list) {
-  return Math.round(list.reduce((a,s) => a+(s.duration||0), 0) / 60);
-}
+function durStr(sec){ return `${pad(Math.floor(sec/60))}:${pad(sec%60)}`; }
+function totalMin(list){ return Math.round(list.reduce((a,s)=>a+(s.duration||0),0)/60); }
 
 // ── storage ───────────────────────────────────────────────────────
-function load() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-}
+function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }catch{ return []; } }
+function save(s){ localStorage.setItem(STORAGE_KEY,JSON.stringify(s)); }
 
-function save(sessions) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-}
-
-// ── preload (solo si no hay datos del 5/6) ────────────────────────
-(function ensurePreload() {
-  let sessions = load();
-  if (sessions.find(s => s.id === 'pre-1')) return;
-  function li(date, time) {
-    return new Date(`${date}T${time}:00`).toISOString();
-  }
-  const pre = [
-    { id:'pre-1', side:'izquierda', date:'2026-06-05',
-      startTime:li('2026-06-05','18:00'), endTime:li('2026-06-05','18:20'), duration:1200 },
-    { id:'pre-2', side:'derecha',   date:'2026-06-05',
-      startTime:li('2026-06-05','18:20'), endTime:li('2026-06-05','18:35'), duration:900  },
-    { id:'pre-3', side:'derecha',   date:'2026-06-05',
-      startTime:li('2026-06-05','20:55'), endTime:li('2026-06-05','21:20'), duration:1500 },
-  ];
-  save([...pre, ...sessions]);
+// ── preload ───────────────────────────────────────────────────────
+(function(){
+  let s=load();
+  if(s.find(x=>x.id==='pre-1')) return;
+  function li(date,time){ return new Date(`${date}T${time}:00`).toISOString(); }
+  save([
+    {id:'pre-1',side:'izquierda',date:'2026-06-05',startTime:li('2026-06-05','18:00'),endTime:li('2026-06-05','18:20'),duration:1200},
+    {id:'pre-2',side:'derecha',  date:'2026-06-05',startTime:li('2026-06-05','18:20'),endTime:li('2026-06-05','18:35'),duration:900},
+    {id:'pre-3',side:'derecha',  date:'2026-06-05',startTime:li('2026-06-05','20:55'),endTime:li('2026-06-05','21:20'),duration:1500},
+    ...s
+  ]);
 })();
 
 // ── active session ────────────────────────────────────────────────
-let activeSession = null;
-let timerInterval = null;
+let activeSession=null, timerInterval=null;
 
-function startSession(side) {
-  if (activeSession) return;
-  activeSession = { side, startTime: new Date().toISOString(), elapsed: 0 };
+function startSession(side){
+  if(activeSession) return;
+  activeSession={side,startTime:new Date().toISOString(),elapsed:0};
   renderActive();
-  timerInterval = setInterval(() => {
+  timerInterval=setInterval(()=>{
     activeSession.elapsed++;
-    document.getElementById('timer-display').textContent = durStr(activeSession.elapsed);
-  }, 1000);
+    document.getElementById('timer-display').textContent=durStr(activeSession.elapsed);
+  },1000);
 }
 
-function stopSession() {
-  if (!activeSession) return;
+function stopSession(){
+  if(!activeSession) return;
   clearInterval(timerInterval);
-  const now = new Date();
-  const s = {
-    id: Date.now().toString(),
-    side: activeSession.side,
-    date: localDateStr(new Date(activeSession.startTime)),
-    startTime: activeSession.startTime,
-    endTime: now.toISOString(),
-    duration: activeSession.elapsed,
+  const s={
+    id:Date.now().toString(), side:activeSession.side,
+    date:localDateStr(new Date(activeSession.startTime)),
+    startTime:activeSession.startTime, endTime:new Date().toISOString(),
+    duration:activeSession.elapsed
   };
-  const sessions = load();
-  sessions.unshift(s);
-  save(sessions);
-  activeSession = null;
-  renderActive();
-  renderToday();
+  const all=load(); all.unshift(s); save(all);
+  activeSession=null; renderActive(); renderToday();
 }
 
-function renderActive() {
-  const card = document.getElementById('active-card');
-  const startArea = document.getElementById('start-area');
-  if (activeSession) {
-    card.className = activeSession.side === 'izquierda' ? 'left' : 'right';
-    card.id = 'active-card';
-    card.style.display = 'block';
-    document.getElementById('active-label').textContent =
-      activeSession.side === 'izquierda' ? '⬅️ Teta izquierda' : '➡️ Teta derecha';
-    document.getElementById('active-start').textContent =
-      'Inicio: ' + fmtTime(activeSession.startTime);
-    document.getElementById('timer-display').textContent = durStr(activeSession.elapsed);
-    startArea.style.display = 'none';
+function renderActive(){
+  const card=document.getElementById('active-card');
+  const startArea=document.getElementById('start-area');
+  if(activeSession){
+    card.className=activeSession.side==='izquierda'?'left':'right';
+    card.id='active-card'; card.style.display='block';
+    document.getElementById('active-label').textContent=
+      activeSession.side==='izquierda'?'⬅️ Teta izquierda':'➡️ Teta derecha';
+    document.getElementById('active-start').textContent='Inicio: '+fmtTime(activeSession.startTime);
+    document.getElementById('timer-display').textContent=durStr(activeSession.elapsed);
+    startArea.style.display='none';
   } else {
-    card.style.display = 'none';
-    startArea.style.display = 'block';
-    renderHint();
+    card.style.display='none'; startArea.style.display='block'; renderHint();
   }
 }
 
-function renderHint() {
-  const sessions = load();
-  const hint = document.getElementById('hint-text');
-  if (!sessions.length) { hint.textContent = ''; return; }
-  const last = sessions[0].side;
-  const next = last === 'izquierda' ? '➡️ derecha' : '⬅️ izquierda';
-  hint.innerHTML = `Última: ${last==='izquierda'?'⬅️':'➡️'} ${last} · <strong>Próxima: ${next}</strong>`;
+function renderHint(){
+  const s=load(); const hint=document.getElementById('hint-text');
+  if(!s.length){ hint.textContent=''; return; }
+  const last=s[0].side;
+  hint.innerHTML=`Última: ${last==='izquierda'?'⬅️':'➡️'} ${last} · <strong>Próxima: ${last==='izquierda'?'➡️ derecha':'⬅️ izquierda'}</strong>`;
 }
 
-// ── render today ──────────────────────────────────────────────────
-function renderToday() {
-  const sessions = load();
-  const today = todayStr();
-  const ts = sessions.filter(s => s.date === today)
-    .sort((a,b) => new Date(b.startTime) - new Date(a.startTime));
-
-  document.getElementById('stat-tomas').textContent = ts.length;
-  document.getElementById('stat-min').textContent = totalMin(ts);
-  document.getElementById('stat-sides').textContent =
+// ── today ─────────────────────────────────────────────────────────
+function renderToday(){
+  const all=load(), today=todayStr();
+  const ts=all.filter(s=>s.date===today).sort((a,b)=>new Date(b.startTime)-new Date(a.startTime));
+  document.getElementById('stat-tomas').textContent=ts.length;
+  document.getElementById('stat-min').textContent=totalMin(ts);
+  document.getElementById('stat-sides').textContent=
     `${ts.filter(s=>s.side==='izquierda').length}/${ts.filter(s=>s.side==='derecha').length}`;
-
-  const list = document.getElementById('today-list');
-  list.innerHTML = ts.length
-    ? ts.map(sessionHTML).join('')
-    : '<div class="empty">Todavía no hay tomas registradas hoy 🌙</div>';
+  const list=document.getElementById('today-list');
+  list.innerHTML=ts.length?ts.map(sessionHTML).join(''):'<div class="empty">Todavía no hay tomas registradas hoy 🌙</div>';
 }
 
-function sessionHTML(s) {
-  const cls = s.side === 'izquierda' ? 'left' : 'right';
-  const em  = s.side === 'izquierda' ? '⬅️' : '➡️';
-  const id  = s.id;
-  return `<div class="session-card ${cls}" id="sc-${id}">
+function sessionHTML(s){
+  const cls=s.side==='izquierda'?'left':'right';
+  const em=s.side==='izquierda'?'⬅️':'➡️';
+  return `<div class="session-card ${cls}" id="sc-${s.id}">
     <div class="session-icon">${em}</div>
     <div class="session-info">
       <div class="name">Teta ${s.side}</div>
@@ -487,133 +340,189 @@ function sessionHTML(s) {
       <div class="unit">min:seg</div>
     </div>
     <div class="card-actions">
-      <button class="btn-icon btn-edit" onclick="editSession('${id}')">✏️</button>
-      <button class="btn-icon btn-del"  onclick="deleteSession('${id}')">✕</button>
+      <button class="btn-icon btn-edit" onclick="editSession('${s.id}')">✏️</button>
+      <button class="btn-icon btn-del"  onclick="deleteSession('${s.id}')">✕</button>
     </div>
   </div>`;
 }
 
-// ── delete ────────────────────────────────────────────────────────
-function deleteSession(id) {
-  if (!confirm('¿Eliminar esta toma?')) return;
-  save(load().filter(s => String(s.id) !== String(id)));
-  renderToday();
-  renderHistory();
+// ── delete / edit ─────────────────────────────────────────────────
+function deleteSession(id){
+  if(!confirm('¿Eliminar esta toma?')) return;
+  save(load().filter(s=>String(s.id)!==String(id)));
+  renderToday(); renderHistorial();
 }
 
-// ── edit ──────────────────────────────────────────────────────────
-function editSession(id) {
-  const s = load().find(s => String(s.id) === String(id));
-  if (!s) return;
-  editingId = id;
-  document.getElementById('modal-title').textContent = '✏️ Editar toma';
-  document.getElementById('m-date').value  = s.date;
-  document.getElementById('m-start').value = fmtTime(s.startTime);
-  document.getElementById('m-end').value   = fmtTime(s.endTime);
-  document.getElementById('m-side').value  = s.side;
+function editSession(id){
+  const s=load().find(s=>String(s.id)===String(id));
+  if(!s) return;
+  editingId=id;
+  document.getElementById('modal-title').textContent='✏️ Editar toma';
+  document.getElementById('m-date').value=s.date;
+  document.getElementById('m-start').value=fmtTime(s.startTime);
+  document.getElementById('m-end').value=fmtTime(s.endTime);
+  document.getElementById('m-side').value=s.side;
   document.getElementById('modal').classList.add('open');
 }
 
 // ── modal ─────────────────────────────────────────────────────────
-function openModal() {
-  editingId = null;
-  document.getElementById('modal-title').textContent = '✏️ Cargar toma';
-  document.getElementById('m-date').value  = todayStr();
-  document.getElementById('m-start').value = '';
-  document.getElementById('m-end').value   = '';
-  document.getElementById('m-side').value  = 'izquierda';
+function openModal(){
+  editingId=null;
+  document.getElementById('modal-title').textContent='✏️ Cargar toma';
+  document.getElementById('m-date').value=todayStr();
+  document.getElementById('m-start').value='';
+  document.getElementById('m-end').value='';
+  document.getElementById('m-side').value='izquierda';
   document.getElementById('modal').classList.add('open');
 }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); editingId=null; }
+function closeModalOutside(e){ if(e.target===document.getElementById('modal')) closeModal(); }
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  editingId = null;
-}
-
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modal')) closeModal();
-}
-
-function saveModal() {
-  const date  = document.getElementById('m-date').value;
-  const start = document.getElementById('m-start').value;
-  const end   = document.getElementById('m-end').value;
-  const side  = document.getElementById('m-side').value;
-  if (!date || !start || !end) { alert('Completá todos los campos'); return; }
-
-  const startISO = new Date(`${date}T${start}:00`).toISOString();
-  const endISO   = new Date(`${date}T${end}:00`).toISOString();
-  const duration = Math.max(0, Math.round((new Date(endISO) - new Date(startISO)) / 1000));
-
-  let sessions = load();
-  if (editingId) {
-    sessions = sessions.map(s =>
-      String(s.id) === String(editingId)
-        ? { ...s, side, date, startTime: startISO, endTime: endISO, duration }
-        : s
-    );
+function saveModal(){
+  const date=document.getElementById('m-date').value;
+  const start=document.getElementById('m-start').value;
+  const end=document.getElementById('m-end').value;
+  const side=document.getElementById('m-side').value;
+  if(!date||!start||!end){ alert('Completá todos los campos'); return; }
+  const startISO=new Date(`${date}T${start}:00`).toISOString();
+  const endISO=new Date(`${date}T${end}:00`).toISOString();
+  const duration=Math.max(0,Math.round((new Date(endISO)-new Date(startISO))/1000));
+  let all=load();
+  if(editingId){
+    all=all.map(s=>String(s.id)===String(editingId)?{...s,side,date,startTime:startISO,endTime:endISO,duration}:s);
   } else {
-    sessions.unshift({ id: Date.now().toString(), side, date, startTime: startISO, endTime: endISO, duration });
+    all.unshift({id:Date.now().toString(),side,date,startTime:startISO,endTime:endISO,duration});
   }
-  save(sessions);
-  closeModal();
-  renderToday();
-  renderHistory();
+  save(all); closeModal(); renderToday(); renderHistorial();
 }
 
-// ── history ───────────────────────────────────────────────────────
-function renderHistory() {
-  const sessions = load();
-  const byDate = {};
-  sessions.forEach(s => {
-    if (!byDate[s.date]) byDate[s.date] = [];
-    byDate[s.date].push(s);
-  });
-  const days = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
-  const container = document.getElementById('history-list');
-  if (!days.length) {
-    container.innerHTML = '<div class="empty">No hay registros todavía</div>';
-    return;
-  }
-  container.innerHTML = days.map(day => {
-    const list = byDate[day].sort((a,b) => new Date(b.startTime)-new Date(a.startTime));
-    const izq = list.filter(s=>s.side==='izquierda').length;
-    const der = list.filter(s=>s.side==='derecha').length;
-    return `<div class="day-block">
-      <button class="day-header" onclick="toggleDay(this)">
-        <div>
-          <div class="day-title">${fmtDate(day)}</div>
-          <div class="day-sub">${list.length} tomas · ${totalMin(list)} min · Izq ${izq} / Der ${der}</div>
-        </div>
-        <span class="chevron">▼</span>
-      </button>
-      <div class="day-body">
-        ${list.map(sessionHTML).join('')}
-      </div>
+// ── historial ─────────────────────────────────────────────────────
+function byDateGroups(){
+  const all=load();
+  const map={};
+  all.forEach(s=>{ if(!map[s.date]) map[s.date]=[]; map[s.date].push(s); });
+  const days=Object.keys(map).sort((a,b)=>b.localeCompare(a));
+  return {map,days};
+}
+
+function renderHistorial(){
+  renderTable();
+  renderChart();
+}
+
+// TABLA
+function renderTable(){
+  const {map,days}=byDateGroups();
+  const container=document.getElementById('history-table');
+  if(!days.length){ container.innerHTML='<div class="empty">No hay registros todavía</div>'; return; }
+  container.innerHTML=days.map(day=>{
+    const list=map[day].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+    return `<div class="day-group">
+      <div class="day-label">${fmtDate(day)} · ${list.length} tomas · ${totalMin(list)} min</div>
+      <div class="sessions-list">${list.map(sessionHTML).join('')}</div>
     </div>`;
   }).join('');
 }
 
-function toggleDay(btn) {
-  btn.classList.toggle('open');
-  const body = btn.nextElementSibling;
-  body.classList.toggle('open');
-  btn.querySelector('.chevron').textContent = body.classList.contains('open') ? '▲' : '▼';
+// GRÁFICO
+function renderChart(){
+  const {map,days}=byDateGroups();
+  const container=document.getElementById('history-chart');
+  if(!days.length){ container.innerHTML='<div class="empty">No hay registros todavía</div>'; return; }
+
+  container.innerHTML=days.map(day=>{
+    const list=map[day].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+    return `<div class="chart-day-block">
+      <div class="chart-day-label">${fmtDate(day)}</div>
+      <div class="chart-scroll">${buildDayChart(list)}</div>
+    </div>`;
+  }).join('');
 }
 
-// ── view ──────────────────────────────────────────────────────────
-function showView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('visible'));
+function buildDayChart(sessions){
+  // Real-time x axis: 0h to 24h, scale to pixel width
+  const W = 600;          // total svg width (scrollable)
+  const H = 120;          // svg height
+  const BAR_H = 50;       // bar height
+  const BAR_Y = 20;       // bar top y
+  const AXIS_Y = H - 22;  // x axis y
+  const TICK_H = 5;
+  const LEFT_PAD = 0;
+
+  // Find actual time range with padding
+  const starts = sessions.map(s => new Date(s.startTime));
+  const ends   = sessions.map(s => new Date(s.endTime));
+  const minH   = Math.max(0,  Math.min(...starts.map(d=>d.getHours())) - 1);
+  const maxH   = Math.min(24, Math.max(...ends.map(d=>d.getHours() + (d.getMinutes()>0?1:0))) + 1);
+  const rangeMin = minH * 60;
+  const rangeMax = maxH * 60;
+  const totalRange = rangeMax - rangeMin;
+
+  function toX(iso){
+    const d=new Date(iso);
+    const mins=d.getHours()*60+d.getMinutes();
+    return LEFT_PAD + ((mins - rangeMin) / totalRange) * W;
+  }
+
+  // Bars
+  let bars = sessions.map(s=>{
+    const x1=toX(s.startTime);
+    const x2=toX(s.endTime);
+    const w=Math.max(4, x2-x1);
+    const fill=s.side==='izquierda'?'#8fbfd4':'#d48fb8';
+    const stroke=s.side==='izquierda'?'#5a9ab8':'#b86898';
+    const label=`${fmtTime(s.startTime)}\n${durStr(s.duration)}`;
+    return `<rect x="${x1.toFixed(1)}" y="${BAR_Y}" width="${w.toFixed(1)}" height="${BAR_H}"
+      rx="5" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+    <text x="${(x1+w/2).toFixed(1)}" y="${(BAR_Y+BAR_H/2-6).toFixed(1)}"
+      text-anchor="middle" font-size="9" fill="${s.side==='izquierda'?'#1a4a5e':'#5e1a4a'}" font-family="DM Sans,sans-serif">
+      ${fmtTime(s.startTime)}</text>
+    <text x="${(x1+w/2).toFixed(1)}" y="${(BAR_Y+BAR_H/2+7).toFixed(1)}"
+      text-anchor="middle" font-size="9" fill="${s.side==='izquierda'?'#1a4a5e':'#5e1a4a'}" font-family="DM Sans,sans-serif">
+      ${durStr(s.duration)}</text>`;
+  }).join('');
+
+  // X axis line
+  let axis = `<line x1="${LEFT_PAD}" y1="${AXIS_Y}" x2="${W+LEFT_PAD}" y2="${AXIS_Y}" stroke="#c8b090" stroke-width="1"/>`;
+
+  // Ticks every hour
+  let ticks = '';
+  for(let h=minH; h<=maxH; h++){
+    const mins=h*60;
+    if(mins<rangeMin||mins>rangeMax) continue;
+    const x=LEFT_PAD+((mins-rangeMin)/totalRange)*W;
+    ticks+=`<line x1="${x.toFixed(1)}" y1="${AXIS_Y}" x2="${x.toFixed(1)}" y2="${(AXIS_Y+TICK_H).toFixed(1)}" stroke="#c8b090" stroke-width="1"/>
+    <text x="${x.toFixed(1)}" y="${(AXIS_Y+TICK_H+11).toFixed(1)}"
+      text-anchor="middle" font-size="9" fill="#a07850" font-family="DM Sans,sans-serif">${pad(h)}:00</text>`;
+  }
+
+  // Y axis label (duration) — static guide lines
+  const maxDur = Math.max(...sessions.map(s=>s.duration/60), 10);
+  const yScale = BAR_H / maxDur; // not used for bars (fixed height), just decorative
+
+  return `<svg class="chart" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    ${bars}${axis}${ticks}
+  </svg>`;
+}
+
+// ── views ─────────────────────────────────────────────────────────
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('visible'));
   document.getElementById('view-'+name).classList.add('visible');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  if (name === 'historial') renderHistory();
+  if(name==='historial') renderHistorial();
+}
+
+function showSubview(name){
+  document.querySelectorAll('.subview').forEach(v=>v.classList.remove('visible'));
+  document.getElementById('subview-'+name).classList.add('visible');
+  document.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('subtab-'+name).classList.add('active');
 }
 
 // ── service worker ────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
-}
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 
 // ── init ──────────────────────────────────────────────────────────
 renderActive();
