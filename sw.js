@@ -1,9 +1,8 @@
-const CACHE = 'lactancia-v2';
+const CACHE = 'lactancia-202606060922';
 const FILES = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
-  // Activarse de inmediato sin esperar a que cierren la pestaña
   self.skipWaiting();
 });
 
@@ -16,6 +15,10 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    fetch(e.request).catch(() => caches.match(e.request))
   );
+});
+
+self.addEventListener('message', e => {
+  if (e.data && e.data.action === 'skipWaiting') self.skipWaiting();
 });
