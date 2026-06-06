@@ -204,7 +204,7 @@ svg.chart{display:block;overflow:visible}
       <div class="section-label">Resumen de ayer</div>
       <div class="stats">
         <div class="stat"><div class="val" id="stat-ayer-tomas">0</div><div class="key">Tomas</div></div>
-        <div class="stat"><div class="val" id="stat-ayer-min">0</div><div class="key">Minutos</div></div>
+        <div class="stat"><div class="val" id="stat-ayer-min">0</div><div class="key">Min/toma</div></div>
         <div class="stat"><div class="val" id="stat-ayer-sides">0/0</div><div class="key">Izq/Der</div></div>
       </div>
     </div>
@@ -358,7 +358,7 @@ function renderToday(){
   if(ay.length){
     ayerCard.style.display='';
     document.getElementById('stat-ayer-tomas').textContent=ay.length;
-    document.getElementById('stat-ayer-min').textContent=totalMin(ay);
+    document.getElementById('stat-ayer-min').textContent=ay.length?Math.round(totalMin(ay)/ay.length):0;
     document.getElementById('stat-ayer-sides').textContent=
       `${ay.filter(s=>s.side==='izquierda').length}/${ay.filter(s=>s.side==='derecha').length}`;
   } else {
