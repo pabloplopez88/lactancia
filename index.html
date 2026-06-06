@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606061148 -->
+<!-- v202606061208 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -587,12 +587,15 @@ function buildUnifiedChart(sessions){
     }
   }
 
-  // Bars
+  // Bars — fixed width, centered on midpoint of each session
+  const BAR_W = 5;
   let bars=sorted.map(s=>{
-    const x1=toX(s.startTime);
+    const midT=new Date((new Date(s.startTime).getTime()+new Date(s.endTime).getTime())/2).toISOString();
+    const xCenter=toX(midT);
+    const x1=xCenter-BAR_W/2;
     const bh=toBarH(s.duration);
     const by=YPAD_T+PLOT_H-bh;
-    const bw=Math.max(5,toX(s.endTime)-x1);
+    const bw=BAR_W;
     const fill=s.side==='izquierda'?'#8fbfd4':'#d48fb8';
     const stroke=s.side==='izquierda'?'#5a9ab8':'#b86898';
     const tc=s.side==='izquierda'?'#1a4a5e':'#5e1a4a';
@@ -604,8 +607,14 @@ function buildUnifiedChart(sessions){
 
   const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="#c8b090" stroke-width="1.2"/>`;
 
+  // Average duration line
+  const avgDurMin=sessions.reduce((a,s)=>a+s.duration,0)/60/sessions.length;
+  const avgY=(YPAD_T+PLOT_H-(avgDurMin/yMax)*PLOT_H).toFixed(1);
+  const avgLine=`<line x1="${XPAD_L}" y1="${avgY}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgY}" stroke="#c4845a" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgY)+3).toFixed(1)}" font-size="7.5" fill="#c4845a" font-family="DM Sans,sans-serif">x̄${Math.round(avgDurMin)}m</text>`;
+
   return `<svg class="chart" width="100%" viewBox="0 0 ${VW} ${H}" style="display:block">
-    ${yLines}${yLabels}${yAxisLabel}${midnights}${bars}${baseline}${xTicks}
+    ${yLines}${yLabels}${yAxisLabel}${midnights}${avgLine}${bars}${baseline}${xTicks}
   </svg>`;
 }
 
