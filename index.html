@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606071341 -->
+<!-- v202606071431 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -705,24 +705,20 @@ function buildUnifiedChart(sessions){
   }
 
   // Compute dot positions
-  const R = 3;
+  const R = 5;
   const pts = sorted.map(s=>{
     const midT=new Date((new Date(s.startTime).getTime()+new Date(s.endTime).getTime())/2).toISOString();
-    return { cx: toX(midT), cy: YPAD_T+PLOT_H-toBarH(s.duration), side: s.side };
+    return { cx: toX(midT), cy: YPAD_T+PLOT_H-toBarH(s.duration), side: s.side, dur: s.duration };
   });
 
-  // Straight lines between points
-  let spline = '';
-  if(pts.length >= 2){
-    const d = pts.map((p,i) => `${i===0?'M':'L'} ${p.cx.toFixed(1)},${p.cy.toFixed(1)}`).join(' ');
-    spline = `<path d="${d}" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>`;
-  }
+  const spline = '';
 
-  // Dots
+  // Dots — radius proportional to duration (r=5 at 20min)
   const bars = pts.map(p=>{
+    const r = Math.max(2, (p.dur/60/20)*5);
     const fill=p.side==='izquierda'?'#ffd84d':'#4de8a8';
     const stroke=p.side==='izquierda'?'#c8960a':'#1ab87a';
-    return `<circle cx="${p.cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="${R}" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`;
+    return `<circle cx="${p.cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`;
   }).join('');
 
   const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
