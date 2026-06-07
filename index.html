@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606071157 -->
+<!-- v202606071259 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -650,18 +650,35 @@ function buildUnifiedChart(sessions){
     iterD.setDate(iterD.getDate()+1);
   }
 
-  // Bars — yellow (izquierda) and green (derecha) to contrast with sky bg
-  const BAR_W = 5;
-  let bars=sorted.map(s=>{
+  // Compute dot positions
+  const R = 3;
+  const pts = sorted.map(s=>{
     const midT=new Date((new Date(s.startTime).getTime()+new Date(s.endTime).getTime())/2).toISOString();
-    const xCenter=toX(midT);
-    const x1=xCenter-BAR_W/2;
-    const bh=toBarH(s.duration);
-    const by=YPAD_T+PLOT_H-bh;
-    const bw=BAR_W;
-    const fill=s.side==='izquierda'?'#ffd84d':'#4de8a8';
-    const stroke=s.side==='izquierda'?'#c8960a':'#1ab87a';
-    return `<rect x="${x1.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1"/>`;
+    return { cx: toX(midT), cy: YPAD_T+PLOT_H-toBarH(s.duration), side: s.side };
+  });
+
+  // Catmull-rom spline through all points
+  let spline = '';
+  if(pts.length >= 2){
+    function cmToBez(p0,p1,p2,p3){
+      const t=0.5;
+      const d1x=(p2.cx-p0.cx)*t, d1y=(p2.cy-p0.cy)*t;
+      const d2x=(p3.cx-p1.cx)*t, d2y=(p3.cy-p1.cy)*t;
+      return `C ${(p1.cx+d1x/3).toFixed(1)},${(p1.cy+d1y/3).toFixed(1)} ${(p2.cx-d2x/3).toFixed(1)},${(p2.cy-d2y/3).toFixed(1)} ${p2.cx.toFixed(1)},${p2.cy.toFixed(1)}`;
+    }
+    let d = `M ${pts[0].cx.toFixed(1)},${pts[0].cy.toFixed(1)} `;
+    for(let i=0;i<pts.length-1;i++){
+      const p0=pts[Math.max(0,i-1)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(pts.length-1,i+2)];
+      d += cmToBez(p0,p1,p2,p3) + ' ';
+    }
+    spline = `<path d="${d}" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+
+  // Dots
+  const bars = pts.map(p=>{
+    const fill=p.side==='izquierda'?'#ffd84d':'#4de8a8';
+    const stroke=p.side==='izquierda'?'#c8960a':'#1ab87a';
+    return `<circle cx="${p.cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="${R}" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`;
   }).join('');
 
   const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
@@ -673,7 +690,7 @@ function buildUnifiedChart(sessions){
   <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgY)+3).toFixed(1)}" font-size="7.5" fill="#ffd84d" font-family="DM Sans,sans-serif">x̄${Math.round(avgDurMin)}m</text>`;
 
   return `<svg class="chart" width="100%" viewBox="0 0 ${VW} ${H}" style="display:block;border-radius:8px">
-    ${svgDefs}${bgRect}${yLines}${yLabels}${yAxisLabel}${midnights}${avgLine}${bars}${baseline}${xTicks}
+    ${svgDefs}${bgRect}${yLines}${yLabels}${yAxisLabel}${midnights}${avgLine}${spline}${bars}${baseline}${xTicks}
   </svg>`;
 }
 
