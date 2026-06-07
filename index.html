@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606061208 -->
+<!-- v202606071157 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -45,26 +45,26 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .btn-side{padding:20px 10px;border-radius:18px;border:2px solid;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:transform .1s;line-height:1.4}
 .btn-side:active{transform:scale(.96)}
-.btn-side.left{background:linear-gradient(135deg,#c8e4f0,#a8cee0);border-color:var(--left-border);color:var(--left-dark)}
-.btn-side.right{background:linear-gradient(135deg,#f0c8e0,#e0a8cc);border-color:var(--right-border);color:var(--right-dark)}
+.btn-side.left{background:linear-gradient(135deg,#fff0b0,#ffe060);border-color:#c8960a;color:#7a5500}
+.btn-side.right{background:linear-gradient(135deg,#b8f0d8,#80e8b8);border-color:#1ab87a;color:#005a38}
 .btn-side .emoji{font-size:26px;display:block;margin-bottom:4px}
 .btn-side .label{font-size:14px;font-weight:600;display:block}
 .btn-side .sub{font-size:11px;opacity:.7;margin-top:2px;display:block}
 
 /* ACTIVE */
 #active-card{border-radius:18px;padding:16px;margin-bottom:14px;display:none;box-shadow:0 4px 20px rgba(0,0,0,.10)}
-#active-card.left{background:linear-gradient(135deg,#d4eaf2,#b8d8e8);border:2px solid var(--left-border)}
-#active-card.right{background:linear-gradient(135deg,#f0d4e8,#e8b8d0);border:2px solid var(--right-border)}
+#active-card.left{background:linear-gradient(135deg,#fff4b0,#ffe878);border:2px solid #c8960a}
+#active-card.right{background:linear-gradient(135deg,#b8f4dc,#78eabc);border:2px solid #1ab87a}
 #active-card .row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
 #active-card .badge{font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px}
-#active-card.left .badge{color:#4a7a94}#active-card.right .badge{color:#944a7a}
+#active-card.left .badge{color:#7a5500}#active-card.right .badge{color:#005a38}
 #active-card .side-label{font-size:18px;font-family:'Lora',serif}
 #active-card .start-time{font-size:12px;color:#6a5040;margin-top:2px}
 #timer-display{font-size:40px;font-family:monospace;font-weight:bold;line-height:1;text-align:right}
-#active-card.left #timer-display{color:var(--left-dark)}#active-card.right #timer-display{color:var(--right-dark)}
+#active-card.left #timer-display{color:#7a5500}#active-card.right #timer-display{color:#005a38}
 .timer-unit{font-size:10px;color:#8a7060;text-align:right;margin-top:2px}
 .btn-stop{width:100%;padding:12px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;color:#fff;cursor:pointer}
-#active-card.left .btn-stop{background:#2a6a84}#active-card.right .btn-stop{background:#842a6a}
+#active-card.left .btn-stop{background:#c8960a}#active-card.right .btn-stop{background:#1ab87a}
 
 /* SUMMARY */
 .summary-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;border:1px solid #ead8c8;box-shadow:0 2px 10px rgba(0,0,0,.04)}
@@ -75,14 +75,14 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 /* SESSION CARDS */
 .sessions-list{display:flex;flex-direction:column;gap:4px}
 .session-card{display:flex;align-items:center;padding:7px 10px;border-radius:9px;gap:8px}
-.session-card.left{background:#e8f4f8;border-left:3px solid var(--left-border)}
-.session-card.right{background:#f8e8f4;border-left:3px solid var(--right-border)}
+.session-card.left{background:#fdf6d8;border-left:3px solid #e8c020}
+.session-card.right{background:#d8f5ec;border-left:3px solid #1ab87a}
 .session-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.session-card.left .session-dot{background:var(--left-border)}
-.session-card.right .session-dot{background:var(--right-border)}
+.session-card.left .session-dot{background:#c8960a}
+.session-card.right .session-dot{background:#1ab87a}
 .session-info{flex:1;min-width:0;display:flex;align-items:center;gap:6px}
 .session-info .name{font-size:12px;font-weight:600;white-space:nowrap}
-.session-card.left .session-info .name{color:var(--left-dark)}.session-card.right .session-info .name{color:var(--right-dark)}
+.session-card.left .session-info .name{color:#7a5500}.session-card.right .session-info .name{color:#005a38}
 .session-info .times{font-size:11px;color:#7a6050}
 .session-dur{flex-shrink:0;font-size:12px;font-family:monospace;font-weight:bold;color:#8a7060}
 .card-actions{display:flex;gap:2px;flex-shrink:0}
@@ -233,13 +233,14 @@ svg.chart{display:block;overflow:visible}
 
     <div id="subview-tabla" class="subview visible">
       <button class="manual-btn" onclick="openModal()">✏️ Cargar toma a mano</button>
+      <button class="manual-btn" style="border-color:#a07850;color:#a07850" onclick="exportCSV()">⬇ Descargar CSV</button>
       <div id="history-table"></div>
     </div>
 
     <div id="subview-grafico" class="subview">
       <div class="chart-legend">
-        <div class="legend-dot" style="background:#8fbfd4"></div><span>Teta izquierda</span>
-        <div class="legend-dot" style="background:#d48fb8"></div><span>Teta derecha</span>
+        <div class="legend-dot" style="background:#ffd84d"></div><span>Teta izquierda</span>
+        <div class="legend-dot" style="background:#4de8a8"></div><span>Teta derecha</span>
       </div>
       <div id="history-chart"></div>
     </div>
@@ -537,17 +538,87 @@ function buildUnifiedChart(sessions){
     return Math.max(3,(durSec/60/yMax)*PLOT_H);
   }
 
-  // Y grid
+  // Day/night background — SVG linearGradient with stops at key hours
+  const SKY_STOPS = [
+    [0,  [22, 24, 42]],   // midnight
+    [4,  [25, 27, 50]],   // late night
+    [5,  [45, 50, 80]],   // pre-dawn
+    [6,  [85, 100, 135]], // dawn — blue-grey
+    [8,  [130, 165, 188]],// morning — muted sky
+    [12, [148, 182, 200]],// midday
+    [17, [138, 175, 196]],// afternoon
+    [19, [110, 120, 148]],// dusk — back to blue-grey
+    [21, [48, 46, 72]],   // early night
+    [23, [28, 27, 48]],   // night
+    [24, [22, 24, 42]],   // midnight again
+  ];
+
+  function skyColor(hourFloat) {
+    hourFloat = ((hourFloat % 24) + 24) % 24;
+    for (let i = 0; i < SKY_STOPS.length - 1; i++) {
+      const [h0, c0] = SKY_STOPS[i];
+      const [h1, c1] = SKY_STOPS[i+1];
+      if (hourFloat >= h0 && hourFloat <= h1) {
+        const t = (hourFloat - h0) / (h1 - h0);
+        return c0.map((v, j) => Math.round(v + t * (c1[j] - v)));
+      }
+    }
+    return [28, 30, 48];
+  }
+  function rgbStr(c) { return `rgb(${c[0]},${c[1]},${c[2]})`; }
+
+  // Build SVG linearGradient stops: one per key hour that falls in range,
+  // plus the exact start and end
+  const tStartH = new Date(tStart).getHours() + new Date(tStart).getMinutes()/60;
+  const tEndH   = new Date(tEnd).getHours()   + new Date(tEnd).getMinutes()/60;
+  const tSpanH  = (tEnd - tStart) / 3600000; // total hours in range
+
+  // Collect all key hour timestamps within [tStart, tEnd]
+  // Walk day by day to handle multi-day ranges
+  const gradStops = [];
+  function addGradStop(ms) {
+    const frac = (ms - tStart) / (tEnd - tStart);
+    if (frac < 0 || frac > 1) return;
+    const h = new Date(ms).getHours() + new Date(ms).getMinutes()/60;
+    const col = skyColor(h);
+    gradStops.push({ pct: (frac * 100).toFixed(2), col: rgbStr(col) });
+  }
+
+  // Always add start and end
+  addGradStop(tStart);
+  addGradStop(tEnd);
+
+  // Add each key hour between tStart and tEnd
+  // Iterate each calendar day in range
+  const dayMs = 24 * 3600000;
+  let dayStart = new Date(tStart); dayStart.setHours(0,0,0,0);
+  while (dayStart.getTime() <= tEnd) {
+    for (const [h] of SKY_STOPS) {
+      const ms = dayStart.getTime() + h * 3600000;
+      addGradStop(ms);
+    }
+    dayStart = new Date(dayStart.getTime() + dayMs);
+  }
+
+  gradStops.sort((a, b) => parseFloat(a.pct) - parseFloat(b.pct));
+
+  const gradId = 'skyGrad';
+  const svgDefs = `<defs><linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="0">
+    ${gradStops.map(s => `<stop offset="${s.pct}%" stop-color="${s.col}"/>`).join('')}
+  </linearGradient></defs>`;
+  const bgRect = `<rect x="${XPAD_L}" y="${YPAD_T}" width="${PLOT_W}" height="${PLOT_H}" fill="url(#${gradId})"/>`;
+
+  // Y grid — lighter lines to show over dark bg
   let yLines='', yLabels='';
   const yStep=yMax<=10?2:yMax<=20?5:10;
   for(let y=0;y<=yMax;y+=yStep){
     const yPx=YPAD_T+PLOT_H-(y/yMax)*PLOT_H;
-    yLines+=`<line x1="${XPAD_L}" y1="${yPx.toFixed(1)}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${yPx.toFixed(1)}" stroke="${y===0?'#c8b090':'#ecddc8'}" stroke-width="${y===0?1.2:0.6}" stroke-dasharray="${y===0?'none':'3,3'}"/>`;
+    yLines+=`<line x1="${XPAD_L}" y1="${yPx.toFixed(1)}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${yPx.toFixed(1)}" stroke="${y===0?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.15)'}" stroke-width="${y===0?1.2:0.6}" stroke-dasharray="${y===0?'none':'3,3'}"/>`;
     yLabels+=`<text x="${(XPAD_L-4).toFixed(1)}" y="${(yPx+3.5).toFixed(1)}" text-anchor="end" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${y}</text>`;
   }
   const yAxisLabel=`<text x="7" y="${(YPAD_T+PLOT_H/2).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif" transform="rotate(-90,7,${(YPAD_T+PLOT_H/2).toFixed(1)})">min</text>`;
 
-  // Midnight lines — find all midnights between tStart and tEnd
+  // Midnight lines
   let midnights='';
   const d0=new Date(tStart); d0.setHours(0,0,0,0); d0.setDate(d0.getDate()+1);
   const dCur=new Date(d0);
@@ -555,39 +626,31 @@ function buildUnifiedChart(sessions){
     const x=toX(dCur.toISOString());
     if(x>XPAD_L && x<XPAD_L+PLOT_W){
       const dateLabel=`${pad(dCur.getDate())}/${pad(dCur.getMonth()+1)}`;
-      midnights+=`<line x1="${x.toFixed(1)}" y1="${YPAD_T}" x2="${x.toFixed(1)}" y2="${AXIS_Y}" stroke="#c8b090" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="${(x+2).toFixed(1)}" y="${(YPAD_T+8).toFixed(1)}" font-size="7.5" fill="#b09070" font-family="DM Sans,sans-serif">${dateLabel}</text>`;
+      midnights+=`<line x1="${x.toFixed(1)}" y1="${YPAD_T}" x2="${x.toFixed(1)}" y2="${AXIS_Y}" stroke="rgba(255,255,255,0.35)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="${(x+2).toFixed(1)}" y="${(YPAD_T+8).toFixed(1)}" font-size="7.5" fill="rgba(255,255,255,0.7)" font-family="DM Sans,sans-serif">${dateLabel}</text>`;
     }
     dCur.setDate(dCur.getDate()+1);
   }
 
-  // X axis ticks — one per day at start of day, or sensible interval
-  const totalDays=Math.ceil((tEnd-tStart)/(86400000));
+  // X axis ticks: mark 6, 12, 18, 0 of every day in range (tick + label, no vertical line)
   let xTicks='';
-  if(totalDays<=1){
-    // tick every 2h
-    const d=new Date(tStart); d.setMinutes(0,0,0);
-    while(d.getTime()<=tEnd){
-      const x=toX(d.toISOString());
-      if(x>=XPAD_L-1&&x<=XPAD_L+PLOT_W+1){
-        xTicks+=`<line x1="${x.toFixed(1)}" y1="${AXIS_Y}" x2="${x.toFixed(1)}" y2="${(AXIS_Y+4).toFixed(1)}" stroke="#c8b090" stroke-width="1"/>
-        <text x="${x.toFixed(1)}" y="${(AXIS_Y+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${pad(d.getHours())}:00</text>`;
-      }
-      d.setHours(d.getHours()+2);
+  const KEY_HOURS = [0, 6, 12, 18];
+  const d0t = new Date(tStart); d0t.setHours(0,0,0,0);
+  const iterD = new Date(d0t);
+  while(iterD.getTime() <= tEnd + 86400000) {
+    for(const h of KEY_HOURS) {
+      const ms = iterD.getTime() + h * 3600000;
+      if(ms < tStart || ms > tEnd) { continue; }
+      const x = toX(new Date(ms).toISOString());
+      if(x < XPAD_L || x > XPAD_L + PLOT_W) continue;
+      // h===0 gets midnight line (already in midnights), just add tick+label
+      xTicks += `<line x1="${x.toFixed(1)}" y1="${AXIS_Y}" x2="${x.toFixed(1)}" y2="${(AXIS_Y+4).toFixed(1)}" stroke="#c8b090" stroke-width="1"/>
+      <text x="${x.toFixed(1)}" y="${(AXIS_Y+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${pad(h)}:00</text>`;
     }
-  } else {
-    // tick each day at noon
-    const d=new Date(tStart); d.setHours(12,0,0,0);
-    while(d.getTime()<=tEnd){
-      const x=toX(d.toISOString());
-      if(x>=XPAD_L&&x<=XPAD_L+PLOT_W){
-        xTicks+=`<text x="${x.toFixed(1)}" y="${(AXIS_Y+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${pad(d.getDate())}/${pad(d.getMonth()+1)}</text>`;
-      }
-      d.setDate(d.getDate()+1);
-    }
+    iterD.setDate(iterD.getDate()+1);
   }
 
-  // Bars — fixed width, centered on midpoint of each session
+  // Bars — yellow (izquierda) and green (derecha) to contrast with sky bg
   const BAR_W = 5;
   let bars=sorted.map(s=>{
     const midT=new Date((new Date(s.startTime).getTime()+new Date(s.endTime).getTime())/2).toISOString();
@@ -596,25 +659,21 @@ function buildUnifiedChart(sessions){
     const bh=toBarH(s.duration);
     const by=YPAD_T+PLOT_H-bh;
     const bw=BAR_W;
-    const fill=s.side==='izquierda'?'#8fbfd4':'#d48fb8';
-    const stroke=s.side==='izquierda'?'#5a9ab8':'#b86898';
-    const tc=s.side==='izquierda'?'#1a4a5e':'#5e1a4a';
-    const durM=Math.round(s.duration/60);
-    const labelY=bh>18?by+bh-4:by-3;
-    return `<rect x="${x1.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="1"/>
-    <text x="${(x1+bw/2).toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="7.5" fill="${tc}" font-family="DM Sans,sans-serif">${durM}m</text>`;
+    const fill=s.side==='izquierda'?'#ffd84d':'#4de8a8';
+    const stroke=s.side==='izquierda'?'#c8960a':'#1ab87a';
+    return `<rect x="${x1.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1"/>`;
   }).join('');
 
-  const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="#c8b090" stroke-width="1.2"/>`;
+  const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
 
   // Average duration line
   const avgDurMin=sessions.reduce((a,s)=>a+s.duration,0)/60/sessions.length;
   const avgY=(YPAD_T+PLOT_H-(avgDurMin/yMax)*PLOT_H).toFixed(1);
-  const avgLine=`<line x1="${XPAD_L}" y1="${avgY}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgY}" stroke="#c4845a" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgY)+3).toFixed(1)}" font-size="7.5" fill="#c4845a" font-family="DM Sans,sans-serif">x̄${Math.round(avgDurMin)}m</text>`;
+  const avgLine=`<line x1="${XPAD_L}" y1="${avgY}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgY}" stroke="rgba(255,200,80,0.8)" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgY)+3).toFixed(1)}" font-size="7.5" fill="#ffd84d" font-family="DM Sans,sans-serif">x̄${Math.round(avgDurMin)}m</text>`;
 
-  return `<svg class="chart" width="100%" viewBox="0 0 ${VW} ${H}" style="display:block">
-    ${yLines}${yLabels}${yAxisLabel}${midnights}${avgLine}${bars}${baseline}${xTicks}
+  return `<svg class="chart" width="100%" viewBox="0 0 ${VW} ${H}" style="display:block;border-radius:8px">
+    ${svgDefs}${bgRect}${yLines}${yLabels}${yAxisLabel}${midnights}${avgLine}${bars}${baseline}${xTicks}
   </svg>`;
 }
 
@@ -655,6 +714,27 @@ if ('serviceWorker' in navigator) {
 function applyUpdate() {
   if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
   window.location.reload();
+}
+
+// ── export CSV ───────────────────────────────────────────────────
+function exportCSV(){
+  const sessions = load().sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+  const rows = [['Fecha','Inicio','Fin','Teta','Duracion (min)']];
+  sessions.forEach(s => {
+    rows.push([
+      s.date,
+      fmtTime(s.startTime),
+      fmtTime(s.endTime),
+      s.side,
+      (s.duration/60).toFixed(1)
+    ]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lactancia.csv';
+  a.click();
 }
 
 // ── init ──────────────────────────────────────────────────────────
