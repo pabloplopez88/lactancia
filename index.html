@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081021 -->
+<!-- v202606081102 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -635,7 +635,7 @@ function renderChart(){
   // In landscape fullscreen, the long side of the screen is the chart width
   // Use actual rendered container width for accuracy
   const wrap = document.getElementById('chart-fs-wrap') || container;
-  const w = isLandscape ? Math.round(Math.max(window.screen.width, window.screen.height) * 0.95) : 340;
+  const w = isLandscape ? Math.round(Math.max(window.screen.width, window.screen.height) * 0.95) : (window.innerWidth - 28);
   container.innerHTML=buildUnifiedChart(all, w);
 }
 
