@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081127 -->
+<!-- v202606081138 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -660,13 +660,13 @@ function renderChart(){
   container.innerHTML=buildUnifiedChart(all, w, null, chartLayers);
 }
 
-function buildUnifiedChart(sessions, containerW, containerH, layers){
+function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverride, yPadTOverride){
   const VW     = containerW || 340;
   const FORCE_H = containerH || null;
   const L = layers || { izq:true, der:true, bins:true, avg:true };
-  const YPAD_T = 8;
+  const YPAD_T = yPadTOverride || 8;
   const YPAD_B = 28;
-  const XPAD_L = 32;
+  const XPAD_L = xPadLOverride || 32;
   const XPAD_R = 6;
   const PLOT_W = VW - XPAD_L - XPAD_R;
   const PLOT_H = FORCE_H ? FORCE_H - 36 : 150;
@@ -963,15 +963,15 @@ function renderFullChart(){
   const sh = Math.max(window.screen.width, window.screen.height);  // e.g. 844
 
   // The chart will be drawn at sh wide × sw tall, then rotated -90deg
-  const chartW = sh - 40;   // leave room for close btn
-  const chartH = sw - 20;
+  const chartW = Math.round(sh * 0.82);
+  const chartH = Math.round(sw * 0.82);
 
   const all = load();
   const inner = document.getElementById('chart-modal-inner');
   const content = document.getElementById('chart-modal-content');
 
   content.innerHTML = all.length
-    ? buildUnifiedChart(all, chartW, chartH, chartLayers)
+    ? buildUnifiedChart(all, chartW, chartH, chartLayers, 48, 28)
     : '<div style="color:#fff;padding:20px">No hay registros todavía</div>';
 
   // Size the inner container
@@ -981,10 +981,17 @@ function renderFullChart(){
   // Rotate -90deg around top-left, then translate so it sits inside the screen
   // After -90deg rotation around (0,0): the box ends up at x:[0, chartH], y:[-chartW, 0]
   // We want it at x:[0, sw], y:[0, sh] → translate(0, chartW)
-  inner.style.transformOrigin = 'top left';
-  inner.style.transform = `rotate(-90deg) translateX(-${chartW}px)`;
-  inner.style.top = '0';
-  inner.style.left = '0';
+  // After rotate(-90deg) around top-left:
+  // rotated box occupies: x:[0, chartH], y:[-chartW, 0] (off screen upward)
+  // To center: shift right by (sw-chartH)/2, shift down by (sh+chartW)/2... 
+  // Easier: rotate around center of the element, then position centered on screen
+  // After rotate(-90deg) around center: box occupies chartH wide x chartW tall
+  // Center on screen: left = (sw-chartH)/2, top = (sh-chartW)/2
+  inner.style.transformOrigin = 'center center';
+  inner.style.transform = 'rotate(-90deg)';
+  // Position so element center aligns with screen center
+  inner.style.left = Math.round((sw - chartW) / 2) + 'px';
+  inner.style.top  = Math.round((window.innerHeight - chartH) / 2) + 'px';
 }
 
 // ── init ──────────────────────────────────────────────────────────
