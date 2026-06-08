@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081112 -->
+<!-- v202606081117 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -822,13 +822,24 @@ function buildUnifiedChart(sessions, containerW, containerH){
     binPts.push({ x: bx, y: by });
   }
 
-  // Draw one rect per hour bin
+  // Step-filled path (like matplotlib steps): no gaps between bins
   const hourW = PLOT_W / Math.max(1, lastH - firstH + 1);
-  let spline = binPts.map(p => {
-    const barH = AXIS_Y - p.y;
-    if(barH <= 0) return '';
-    return `<rect x="${(p.x - hourW/2).toFixed(1)}" y="${p.y.toFixed(1)}" width="${hourW.toFixed(1)}" height="${barH.toFixed(1)}" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.20)" stroke-width="0.5"/>`;
-  }).join('');
+  let spline = '';
+  if(binPts.length >= 1){
+    // Each bin occupies [p.x - hourW/2, p.x + hourW/2]
+    let d = '';
+    binPts.forEach((p, i) => {
+      const x0 = (p.x - hourW/2).toFixed(1);
+      const x1 = (p.x + hourW/2).toFixed(1);
+      const y  = p.y.toFixed(1);
+      if(i === 0) d += `M${x0},${AXIS_Y} L${x0},${y} L${x1},${y} `;
+      else        d += `L${x0},${y} L${x1},${y} `;
+    });
+    // Close back to baseline
+    const lastX = (binPts[binPts.length-1].x + hourW/2).toFixed(1);
+    d += `L${lastX},${AXIS_Y} Z`;
+    spline = `<path d="${d}" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linejoin="miter"/>`;
+  }
 
   // Dots — radius proportional to duration (r=5 at 20min)
   const bars = pts.map(p=>{
