@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081138 -->
+<!-- v202606081319 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -318,6 +318,14 @@ svg.chart{display:block;overflow:visible}
       <div id="chart-fs-wrap">
         <div id="history-chart" style="width:100%"></div>
       </div>
+
+      <div style="margin-top:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mid)">Día promedio</div>
+          <button onclick="enterFullChart2()" style="padding:5px 12px;border-radius:20px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--mid);cursor:pointer;white-space:nowrap">⛶ Pantalla completa</button>
+        </div>
+        <div id="history-chart2" style="width:100%"></div>
+      </div>
     </div>
   </div>
 
@@ -328,6 +336,14 @@ svg.chart{display:block;overflow:visible}
   <button id="chart-modal-close" onclick="exitFullChart()">✕</button>
   <div id="chart-modal-inner">
     <div id="chart-modal-content"></div>
+  </div>
+</div>
+
+<!-- FULLSCREEN CHART2 MODAL -->
+<div id="chart-modal2" style="display:none;position:fixed;inset:0;z-index:300;background:#1a1c2e;overflow:hidden">
+  <button id="chart-modal-close2" onclick="exitFullChart2()" style="position:absolute;top:10px;right:10px;z-index:301;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+  <div id="chart-modal-inner2" style="position:absolute">
+    <div id="chart-modal-content2"></div>
   </div>
 </div>
 
@@ -624,6 +640,7 @@ function byDateGroups(){
 function renderHistorial(){
   renderTable();
   renderChart();
+  renderChart2();
 }
 
 // TABLA
@@ -992,6 +1009,193 @@ function renderFullChart(){
   // Position so element center aligns with screen center
   inner.style.left = Math.round((sw - chartW) / 2) + 'px';
   inner.style.top  = Math.round((window.innerHeight - chartH) / 2) + 'px';
+}
+
+// ── stacked day chart ────────────────────────────────────────────
+function renderChart2(){
+  const all = load();
+  const container = document.getElementById('history-chart2');
+  if(!all.length){ container.innerHTML='<div class="empty">No hay registros todavía</div>'; return; }
+  const w = window.innerWidth - 28;
+  container.innerHTML = buildStackedChart(all, w);
+}
+
+function enterFullChart2(){
+  const modal = document.getElementById('chart-modal2');
+  modal.style.display = 'block';
+  renderFullChart2();
+}
+
+function exitFullChart2(){
+  document.getElementById('chart-modal2').style.display = 'none';
+}
+
+function renderFullChart2(){
+  const sw = Math.min(window.screen.width, window.screen.height);
+  const chartW = Math.round(Math.max(window.screen.width, window.screen.height) * 0.82);
+  const chartH = Math.round(sw * 0.82);
+  const all = load();
+  const inner = document.getElementById('chart-modal-inner2');
+  const content = document.getElementById('chart-modal-content2');
+  content.innerHTML = all.length
+    ? buildStackedChart(all, chartW, chartH)
+    : '<div style="color:#fff;padding:20px">No hay registros todavía</div>';
+  inner.style.width  = chartW + 'px';
+  inner.style.height = chartH + 'px';
+  inner.style.transformOrigin = 'center center';
+  inner.style.transform = 'rotate(-90deg)';
+  inner.style.left = Math.round((sw - chartW) / 2) + 'px';
+  inner.style.top  = Math.round((window.innerHeight - chartH) / 2) + 'px';
+}
+
+function buildStackedChart(sessions, containerW, containerH){
+  const VW     = containerW || 340;
+  const FORCE_H = containerH || null;
+  const YPAD_T = containerH ? 28 : 8;
+  const YPAD_B = 28;
+  const XPAD_L = containerH ? 48 : 32;
+  const XPAD_R = 14;
+  const PLOT_W = VW - XPAD_L - XPAD_R;
+  const PLOT_H = FORCE_H ? FORCE_H - 36 : 150;
+  const H      = PLOT_H + YPAD_T + YPAD_B;
+  const AXIS_Y = YPAD_T + PLOT_H;
+
+  // X axis spans exactly 0–24h
+  const DAY_MS = 24 * 3600000;
+  function toX(hourFloat){
+    return XPAD_L + (hourFloat / 24) * PLOT_W;
+  }
+
+  // Build per-day, per-hour bins
+  // For each session, find which hour slots it covers and accumulate
+  const perDayBins = {}; // date -> { hour: minutes }
+  sessions.forEach(s => {
+    const t0 = new Date(s.startTime);
+    const t1 = new Date(s.endTime);
+    const date = s.date;
+    if(!perDayBins[date]) perDayBins[date] = {};
+    // Walk hour slots
+    const h0 = t0.getHours();
+    const h1 = t1.getHours();
+    const ms0 = t0.getTime();
+    const ms1 = t1.getTime();
+    for(let h = h0; h <= h1; h++){
+      const slotStart = new Date(t0); slotStart.setHours(h,0,0,0);
+      const slotEnd   = new Date(t0); slotEnd.setHours(h+1 > 23 ? 23 : h+1, h+1>23?59:0, h+1>23?59:0, h+1>23?999:0);
+      // Handle h==23 specially
+      const slotEndMs = h < 23
+        ? new Date(t0.getFullYear(), t0.getMonth(), t0.getDate(), h+1, 0, 0).getTime()
+        : new Date(t0.getFullYear(), t0.getMonth(), t0.getDate(), 23, 59, 59, 999).getTime();
+      const slotStartMs = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate(), h, 0, 0).getTime();
+      const overlap = (Math.min(ms1, slotEndMs) - Math.max(ms0, slotStartMs)) / 60000;
+      if(overlap > 0) perDayBins[date][h] = (perDayBins[date][h] || 0) + overlap;
+    }
+  });
+
+  const days = Object.keys(perDayBins).sort();
+  const nDays = days.length;
+  if(!nDays) return '<div class="empty">No hay datos</div>';
+
+  // First and last timestamps to know valid range per day
+  const allSorted = [...sessions].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+  const firstMs = new Date(allSorted[0].startTime).getTime();
+  const lastMs  = new Date(allSorted[allSorted.length-1].endTime).getTime();
+
+  // For each hour 0-23, compute average over days where that hour "existed"
+  const avgBins = {}; // hour -> avg minutes
+  for(let h = 0; h < 24; h++){
+    let sum = 0, count = 0;
+    days.forEach(date => {
+      // Does hour h exist for this day?
+      // Hour h of this day: [date h:00, date h+1:00)
+      const [y,m,d] = date.split('-').map(Number);
+      const slotStartMs = new Date(y, m-1, d, h, 0, 0).getTime();
+      const slotEndMs   = new Date(y, m-1, d, h+1 > 23 ? 23 : h+1, 0, 0).getTime();
+      // Slot must have started (slotStart <= lastMs) and be after firstMs
+      if(slotStartMs > lastMs) return;     // future slot
+      if(slotEndMs <= firstMs) return;     // before we started recording
+      // This slot "exists" for this day
+      sum += perDayBins[date][h] || 0;
+      count++;
+    });
+    if(count > 0) avgBins[h] = sum / count;
+  }
+
+  const maxBin = Math.max(...Object.values(avgBins), 1);
+
+  // Build step path
+  const hourW = PLOT_W / 24;
+  let stepD = '';
+  let started = false;
+  for(let h = 0; h < 24; h++){
+    if(avgBins[h] === undefined) continue;
+    const x0 = (XPAD_L + h * hourW).toFixed(1);
+    const x1 = (XPAD_L + (h+1) * hourW).toFixed(1);
+    const y  = (YPAD_T + PLOT_H - (avgBins[h] / maxBin) * PLOT_H * 0.85).toFixed(1);
+    if(!started){ stepD += `M${x0},${AXIS_Y} L${x0},${y} L${x1},${y} `; started=true; }
+    else         { stepD += `L${x0},${y} L${x1},${y} `; }
+  }
+  // Close
+  const lastValidH = [...Array(24).keys()].reverse().find(h => avgBins[h] !== undefined);
+  if(lastValidH !== undefined){
+    stepD += `L${(XPAD_L + (lastValidH+1) * hourW).toFixed(1)},${AXIS_Y} Z`;
+  }
+  const stepPath = stepD
+    ? `<path d="${stepD}" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.55)" stroke-width="1.2" stroke-linejoin="miter"/>`
+    : '';
+
+  // Y grid
+  const yStep = maxBin<=5?1:maxBin<=10?2:maxBin<=20?5:10;
+  let yLines='', yLabels='';
+  for(let y=0; y<=Math.ceil(maxBin); y+=yStep){
+    const yPx = YPAD_T + PLOT_H - (y/maxBin)*PLOT_H*0.85;
+    if(yPx < YPAD_T) break;
+    yLines  += `<line x1="${XPAD_L}" y1="${yPx.toFixed(1)}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${yPx.toFixed(1)}" stroke="${y===0?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.12)'}" stroke-width="${y===0?1.2:0.6}" stroke-dasharray="${y===0?'none':'3,3'}"/>`;
+    yLabels += `<text x="${(XPAD_L-4).toFixed(1)}" y="${(yPx+3.5).toFixed(1)}" text-anchor="end" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${Math.round(y)}</text>`;
+  }
+  const yAxisLabel=`<text x="7" y="${(YPAD_T+PLOT_H/2).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif" transform="rotate(-90,7,${(YPAD_T+PLOT_H/2).toFixed(1)})">min</text>`;
+
+  // X ticks at 0,6,12,18,24
+  let xTicks='';
+  [0,6,12,18,24].forEach(h => {
+    const x = (XPAD_L + (h/24)*PLOT_W).toFixed(1);
+    xTicks += `<line x1="${x}" y1="${AXIS_Y}" x2="${x}" y2="${(AXIS_Y+4).toFixed(1)}" stroke="#c8b090" stroke-width="1"/>
+    <text x="${x}" y="${(AXIS_Y+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${pad(h)}:00</text>`;
+  });
+
+  // Global avg line: total minutes / total hours elapsed
+  const totalMins = sessions.reduce((a,s)=>a+(s.duration||0),0)/60;
+  const totalHours = (lastMs - firstMs) / 3600000;
+  const globalAvgPerHour = totalHours > 0 ? totalMins / totalHours : 0;
+  const avgYpx = (YPAD_T + PLOT_H - (globalAvgPerHour / maxBin) * PLOT_H * 0.85).toFixed(1);
+  const avgLine = avgYpx >= YPAD_T && avgYpx <= AXIS_Y
+    ? `<line x1="${XPAD_L}" y1="${avgYpx}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgYpx}" stroke="rgba(255,200,80,0.8)" stroke-width="1" stroke-dasharray="4,3"/>
+       <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgYpx)+3).toFixed(1)}" font-size="7.5" fill="#ffd84d" font-family="DM Sans,sans-serif">x̄${globalAvgPerHour.toFixed(1)}m</text>`
+    : '';
+
+  // Background gradient 0-24h
+  const SKY_STOPS2 = [[0,[22,24,42]],[4,[25,27,50]],[5,[45,50,80]],[6,[85,100,135]],[8,[130,165,188]],[12,[148,182,200]],[17,[138,175,196]],[19,[110,120,148]],[21,[48,46,72]],[23,[28,27,48]],[24,[22,24,42]]];
+  function skyColor2(h){
+    for(let i=0;i<SKY_STOPS2.length-1;i++){
+      const [h0,c0]=SKY_STOPS2[i],[h1,c1]=SKY_STOPS2[i+1];
+      if(h>=h0&&h<=h1){const t=(h-h0)/(h1-h0);return c0.map((v,j)=>Math.round(v+t*(c1[j]-v)));}
+    }
+    return [22,24,42];
+  }
+  const gradId2='skyGrad2';
+  const gradStops2=[];
+  SKY_STOPS2.forEach(([h])=>{
+    const frac=h/24;
+    const c=skyColor2(h);
+    gradStops2.push(`<stop offset="${(frac*100).toFixed(1)}%" stop-color="rgb(${c[0]},${c[1]},${c[2]})"/>`);
+  });
+  const svgDefs2=`<defs><linearGradient id="${gradId2}" x1="0" y1="0" x2="1" y2="0">${gradStops2.join('')}</linearGradient></defs>`;
+  const bgRect2=`<rect x="${XPAD_L}" y="${YPAD_T}" width="${PLOT_W}" height="${PLOT_H}" fill="url(#${gradId2})"/>`;
+  const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
+
+  return `<svg width="100%" viewBox="0 0 ${VW} ${H}" style="display:block;border-radius:8px">
+    ${svgDefs2}${bgRect2}${yLines}${yLabels}${yAxisLabel}${stepPath}${avgLine}${baseline}${xTicks}
+  </svg>`;
 }
 
 // ── init ──────────────────────────────────────────────────────────
