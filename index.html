@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606080220 -->
+<!-- v202606081021 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -117,6 +117,58 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 .chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .chart-wrap{position:relative;padding-left:36px;padding-bottom:22px}
 svg.chart{display:block;overflow:visible}
+/* fullscreen chart modal */
+#chart-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #1a1c2e;
+  overflow: hidden;
+}
+#chart-modal.open { display: block; }
+#chart-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 301;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+#chart-modal-inner {
+  position: absolute;
+  /* Will be sized and rotated by JS */
+}
+#subview-grafico.landscape-mode .chart-close-btn {
+  display: flex;
+}
+.chart-close-btn {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.chart-close-btn button {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #e0c8b0;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--mid);
+  cursor: pointer;
+}
+#chart-fs-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
 .chart-legend{display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--mid);align-items:center}
 .legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
 .summary-row{display:flex;gap:10px;margin-bottom:0}
@@ -239,14 +291,30 @@ svg.chart{display:block;overflow:visible}
     </div>
 
     <div id="subview-grafico" class="subview">
-      <div class="chart-legend">
-        <div class="legend-dot" style="background:#ffd84d"></div><span>Teta izquierda</span>
-        <div class="legend-dot" style="background:#4de8a8"></div><span>Teta derecha</span>
+      <div class="chart-close-btn">
+        <button onclick="exitFullChart()">✕ Cerrar</button>
       </div>
-      <div id="history-chart"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="chart-legend" style="margin-bottom:0">
+          <div class="legend-dot" style="background:#ffd84d"></div><span>Teta izquierda</span>
+          <div class="legend-dot" style="background:#4de8a8"></div><span>Teta derecha</span>
+        </div>
+        <button onclick="enterFullChart()" style="padding:5px 12px;border-radius:20px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--mid);cursor:pointer">⛶ Pantalla completa</button>
+      </div>
+      <div id="chart-fs-wrap">
+        <div id="history-chart" style="width:100%"></div>
+      </div>
     </div>
   </div>
 
+</div>
+
+<!-- FULLSCREEN CHART MODAL -->
+<div id="chart-modal">
+  <button id="chart-modal-close" onclick="exitFullChart()">✕</button>
+  <div id="chart-modal-inner">
+    <div id="chart-modal-content"></div>
+  </div>
 </div>
 
 <!-- MERGE MODAL -->
@@ -563,17 +631,23 @@ function renderChart(){
   const all=load();
   const container=document.getElementById('history-chart');
   if(!all.length){ container.innerHTML='<div class="empty">No hay registros todavía</div>'; return; }
-  container.innerHTML=buildUnifiedChart(all);
+  const isLandscape=document.getElementById('subview-grafico').classList.contains('landscape-mode');
+  // In landscape fullscreen, the long side of the screen is the chart width
+  // Use actual rendered container width for accuracy
+  const wrap = document.getElementById('chart-fs-wrap') || container;
+  const w = isLandscape ? Math.round(Math.max(window.screen.width, window.screen.height) * 0.95) : 340;
+  container.innerHTML=buildUnifiedChart(all, w);
 }
 
-function buildUnifiedChart(sessions){
-  const VW     = 340;
+function buildUnifiedChart(sessions, containerW, containerH){
+  const VW     = containerW || 340;
+  const FORCE_H = containerH || null;
   const YPAD_T = 8;
   const YPAD_B = 28;
   const XPAD_L = 32;
   const XPAD_R = 6;
   const PLOT_W = VW - XPAD_L - XPAD_R;
-  const PLOT_H = 150;
+  const PLOT_H = FORCE_H ? FORCE_H - 36 : 150;
   const H      = PLOT_H + YPAD_T + YPAD_B;
   const AXIS_Y = YPAD_T + PLOT_H;
 
@@ -731,7 +805,7 @@ function buildUnifiedChart(sessions){
   const avgLine=`<line x1="${XPAD_L}" y1="${avgY}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgY}" stroke="rgba(255,200,80,0.8)" stroke-width="1" stroke-dasharray="4,3"/>
   <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgY)+3).toFixed(1)}" font-size="7.5" fill="#ffd84d" font-family="DM Sans,sans-serif">x̄${Math.round(avgDurMin)}m</text>`;
 
-  return `<svg class="chart" width="100%" viewBox="0 0 ${VW} ${H}" style="display:block;border-radius:8px">
+  return `<svg class="chart" width="${VW}" height="${H}" viewBox="0 0 ${VW} ${H}" style="display:block;border-radius:8px">
     ${svgDefs}${bgRect}${yLines}${yLabels}${yAxisLabel}${midnights}${avgLine}${spline}${bars}${baseline}${xTicks}
   </svg>`;
 }
@@ -794,6 +868,47 @@ function exportCSV(){
   a.href = URL.createObjectURL(blob);
   a.download = 'lactancia.csv';
   a.click();
+}
+
+// ── fullscreen chart ─────────────────────────────────────────────
+function enterFullChart(){
+  const modal = document.getElementById('chart-modal');
+  modal.classList.add('open');
+  renderFullChart();
+}
+
+function exitFullChart(){
+  document.getElementById('chart-modal').classList.remove('open');
+}
+
+function renderFullChart(){
+  // Screen short side = portrait width, long side = portrait height
+  const sw = Math.min(window.screen.width, window.screen.height);  // e.g. 390
+  const sh = Math.max(window.screen.width, window.screen.height);  // e.g. 844
+
+  // The chart will be drawn at sh wide × sw tall, then rotated -90deg
+  const chartW = sh - 40;   // leave room for close btn
+  const chartH = sw - 20;
+
+  const all = load();
+  const inner = document.getElementById('chart-modal-inner');
+  const content = document.getElementById('chart-modal-content');
+
+  content.innerHTML = all.length
+    ? buildUnifiedChart(all, chartW, chartH)
+    : '<div style="color:#fff;padding:20px">No hay registros todavía</div>';
+
+  // Size the inner container
+  inner.style.width  = chartW + 'px';
+  inner.style.height = chartH + 'px';
+
+  // Rotate -90deg around top-left, then translate so it sits inside the screen
+  // After -90deg rotation around (0,0): the box ends up at x:[0, chartH], y:[-chartW, 0]
+  // We want it at x:[0, sw], y:[0, sh] → translate(0, chartW)
+  inner.style.transformOrigin = 'top left';
+  inner.style.transform = `rotate(-90deg) translateX(-${chartW}px)`;
+  inner.style.top = '0';
+  inner.style.left = '0';
 }
 
 // ── init ──────────────────────────────────────────────────────────
