@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081319 -->
+<!-- v202606081347 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -893,10 +893,16 @@ function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverri
   const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="rgba(255,255,255,0.5)" stroke-width="1.2"/>`;
 
   // Average duration line
-  const avgDurMin=sessions.reduce((a,s)=>a+s.duration,0)/60/sessions.length;
-  const avgY=(YPAD_T+PLOT_H-(avgDurMin/yMax)*PLOT_H).toFixed(1);
-  const avgLine=L.avg?`<line x1="${XPAD_L}" y1="${avgY}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgY}" stroke="rgba(255,200,80,0.8)" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgY)+3).toFixed(1)}" font-size="7.5" fill="#ffd84d" font-family="DM Sans,sans-serif">x̅${Math.round(avgDurMin)}m</text>`:'';
+  const izqSessions=sessions.filter(s=>s.side==='izquierda');
+  const derSessions=sessions.filter(s=>s.side==='derecha');
+  function sideAvgLine(list, color, label){
+    if(!list.length) return '';
+    const avg=list.reduce((a,s)=>a+s.duration,0)/60/list.length;
+    const y=(YPAD_T+PLOT_H-(avg/yMax)*PLOT_H).toFixed(1);
+    return `<line x1="${XPAD_L}" y1="${y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${y}" stroke="${color}" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(y)+3).toFixed(1)}" font-size="7.5" fill="${color}" font-family="DM Sans,sans-serif">${label}${Math.round(avg)}m</text>`;
+  }
+  const avgLine=L.avg?(sideAvgLine(izqSessions,'#ffd84d','i:')+sideAvgLine(derSessions,'#4de8a8','d:')):'';
 
   return `<svg class="chart" width="${VW}" height="${H}" viewBox="0 0 ${VW} ${H}" style="display:block;border-radius:8px">
     ${svgDefs}${bgRect}${yLines}${yLabels}${yAxisLabel}${midnights}${avgLine}${spline}${bars}${baseline}${xTicks}
