@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081102 -->
+<!-- v202606081109 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -787,7 +787,50 @@ function buildUnifiedChart(sessions, containerW, containerH){
     return { cx: toX(midT), cy: YPAD_T+PLOT_H-toBarH(s.duration), side: s.side, dur: s.duration };
   });
 
-  const spline = '';
+  // Hourly bins: sum minutes of feeding per hour slot
+  // Each session may span multiple hours — split proportionally
+  const binMap = {};
+  sorted.forEach(s => {
+    const t0 = new Date(s.startTime).getTime();
+    const t1 = new Date(s.endTime).getTime();
+    const durMs = t1 - t0;
+    if(durMs <= 0) return;
+    // Walk through each hour slot the session overlaps
+    const h0 = Math.floor(t0 / 3600000);
+    const h1 = Math.floor((t1 - 1) / 3600000);
+    for(let h = h0; h <= h1; h++){
+      const slotStart = h * 3600000;
+      const slotEnd   = (h + 1) * 3600000;
+      const overlap = Math.min(t1, slotEnd) - Math.max(t0, slotStart);
+      const mins = overlap / 60000;
+      binMap[h] = (binMap[h] || 0) + mins;
+    }
+  });
+
+  // Build area path over the visible time range
+  const firstH = Math.floor(tStart / 3600000);
+  const lastH  = Math.floor((tEnd - 1) / 3600000);
+  const maxBin = Math.max(...Object.values(binMap), 1);
+
+  // Points: center of each hour bin on x, value on y (scaled to PLOT_H)
+  const binPts = [];
+  for(let h = firstH; h <= lastH; h++){
+    const midMs = h * 3600000 + 1800000; // center of hour
+    const bx = Math.max(XPAD_L, Math.min(XPAD_L + PLOT_W, toX(new Date(midMs).toISOString())));
+    const val = binMap[h] || 0;
+    const by = YPAD_T + PLOT_H - (val / maxBin) * PLOT_H * 0.85;
+    binPts.push({ x: bx, y: by });
+  }
+
+  let spline = '';
+  if(binPts.length >= 2){
+    // Area path: line across top, then close down to baseline
+    const lineD = binPts.map((p,i) => `${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const areaD = lineD
+      + ` L${binPts[binPts.length-1].x.toFixed(1)},${AXIS_Y}`
+      + ` L${binPts[0].x.toFixed(1)},${AXIS_Y} Z`;
+    spline = `<path d="${areaD}" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-linejoin="round"/>`;
+  }
 
   // Dots — radius proportional to duration (r=5 at 20min)
   const bars = pts.map(p=>{
