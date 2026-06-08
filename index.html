@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081109 -->
+<!-- v202606081112 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -822,15 +822,13 @@ function buildUnifiedChart(sessions, containerW, containerH){
     binPts.push({ x: bx, y: by });
   }
 
-  let spline = '';
-  if(binPts.length >= 2){
-    // Area path: line across top, then close down to baseline
-    const lineD = binPts.map((p,i) => `${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-    const areaD = lineD
-      + ` L${binPts[binPts.length-1].x.toFixed(1)},${AXIS_Y}`
-      + ` L${binPts[0].x.toFixed(1)},${AXIS_Y} Z`;
-    spline = `<path d="${areaD}" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-linejoin="round"/>`;
-  }
+  // Draw one rect per hour bin
+  const hourW = PLOT_W / Math.max(1, lastH - firstH + 1);
+  let spline = binPts.map(p => {
+    const barH = AXIS_Y - p.y;
+    if(barH <= 0) return '';
+    return `<rect x="${(p.x - hourW/2).toFixed(1)}" y="${p.y.toFixed(1)}" width="${hourW.toFixed(1)}" height="${barH.toFixed(1)}" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.20)" stroke-width="0.5"/>`;
+  }).join('');
 
   // Dots — radius proportional to duration (r=5 at 20min)
   const bars = pts.map(p=>{
