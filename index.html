@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081117 -->
+<!-- v202606081127 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -294,12 +294,26 @@ svg.chart{display:block;overflow:visible}
       <div class="chart-close-btn">
         <button onclick="exitFullChart()">✕ Cerrar</button>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div class="chart-legend" style="margin-bottom:0">
-          <div class="legend-dot" style="background:#ffd84d"></div><span>Teta izquierda</span>
-          <div class="legend-dot" style="background:#4de8a8"></div><span>Teta derecha</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
+            <input type="checkbox" id="tog-izq" checked onchange="toggleLayer('izq')">
+            <span style="width:8px;height:8px;border-radius:50%;background:#ffd84d;display:inline-block"></span>Izquierda
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
+            <input type="checkbox" id="tog-der" checked onchange="toggleLayer('der')">
+            <span style="width:8px;height:8px;border-radius:50%;background:#4de8a8;display:inline-block"></span>Derecha
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
+            <input type="checkbox" id="tog-bins" checked onchange="toggleLayer('bins')">
+            <span style="width:16px;height:2px;background:rgba(255,255,255,0.7);display:inline-block;vertical-align:middle;border-radius:1px"></span>Total/hora
+          </label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
+            <input type="checkbox" id="tog-avg" checked onchange="toggleLayer('avg')">
+            <span style="width:8px;height:8px;border-radius:50%;background:rgba(255,200,80,0.9);display:inline-block"></span>Media
+          </label>
         </div>
-        <button onclick="enterFullChart()" style="padding:5px 12px;border-radius:20px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--mid);cursor:pointer">⛶ Pantalla completa</button>
+        <button onclick="enterFullChart()" style="padding:5px 12px;border-radius:20px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--mid);cursor:pointer;white-space:nowrap">⛶ Pantalla completa</button>
       </div>
       <div id="chart-fs-wrap">
         <div id="history-chart" style="width:100%"></div>
@@ -627,6 +641,13 @@ function renderTable(){
 }
 
 // GRÁFICO
+const chartLayers = { izq: true, der: true, bins: true, avg: true };
+
+function toggleLayer(key){
+  chartLayers[key] = document.getElementById('tog-' + key).checked;
+  renderChart();
+}
+
 function renderChart(){
   const all=load();
   const container=document.getElementById('history-chart');
@@ -636,12 +657,13 @@ function renderChart(){
   // Use actual rendered container width for accuracy
   const wrap = document.getElementById('chart-fs-wrap') || container;
   const w = isLandscape ? Math.round(Math.max(window.screen.width, window.screen.height) * 0.95) : (window.innerWidth - 28);
-  container.innerHTML=buildUnifiedChart(all, w);
+  container.innerHTML=buildUnifiedChart(all, w, null, chartLayers);
 }
 
-function buildUnifiedChart(sessions, containerW, containerH){
+function buildUnifiedChart(sessions, containerW, containerH, layers){
   const VW     = containerW || 340;
   const FORCE_H = containerH || null;
+  const L = layers || { izq:true, der:true, bins:true, avg:true };
   const YPAD_T = 8;
   const YPAD_B = 28;
   const XPAD_L = 32;
@@ -825,7 +847,7 @@ function buildUnifiedChart(sessions, containerW, containerH){
   // Step-filled path (like matplotlib steps): no gaps between bins
   const hourW = PLOT_W / Math.max(1, lastH - firstH + 1);
   let spline = '';
-  if(binPts.length >= 1){
+  if(L.bins && binPts.length >= 1){
     // Each bin occupies [p.x - hourW/2, p.x + hourW/2]
     let d = '';
     binPts.forEach((p, i) => {
@@ -844,6 +866,8 @@ function buildUnifiedChart(sessions, containerW, containerH){
   // Dots — radius proportional to duration (r=5 at 20min)
   const bars = pts.map(p=>{
     const r = Math.max(2, (p.dur/60/20)*5);
+    if(p.side==='izquierda' && !L.izq) return '';
+    if(p.side==='derecha' && !L.der) return '';
     const fill=p.side==='izquierda'?'#ffd84d':'#4de8a8';
     const stroke=p.side==='izquierda'?'#c8960a':'#1ab87a';
     return `<circle cx="${p.cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`;
@@ -854,8 +878,8 @@ function buildUnifiedChart(sessions, containerW, containerH){
   // Average duration line
   const avgDurMin=sessions.reduce((a,s)=>a+s.duration,0)/60/sessions.length;
   const avgY=(YPAD_T+PLOT_H-(avgDurMin/yMax)*PLOT_H).toFixed(1);
-  const avgLine=`<line x1="${XPAD_L}" y1="${avgY}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgY}" stroke="rgba(255,200,80,0.8)" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgY)+3).toFixed(1)}" font-size="7.5" fill="#ffd84d" font-family="DM Sans,sans-serif">x̄${Math.round(avgDurMin)}m</text>`;
+  const avgLine=L.avg?`<line x1="${XPAD_L}" y1="${avgY}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgY}" stroke="rgba(255,200,80,0.8)" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgY)+3).toFixed(1)}" font-size="7.5" fill="#ffd84d" font-family="DM Sans,sans-serif">x̅${Math.round(avgDurMin)}m</text>`:'';
 
   return `<svg class="chart" width="${VW}" height="${H}" viewBox="0 0 ${VW} ${H}" style="display:block;border-radius:8px">
     ${svgDefs}${bgRect}${yLines}${yLabels}${yAxisLabel}${midnights}${avgLine}${spline}${bars}${baseline}${xTicks}
@@ -947,7 +971,7 @@ function renderFullChart(){
   const content = document.getElementById('chart-modal-content');
 
   content.innerHTML = all.length
-    ? buildUnifiedChart(all, chartW, chartH)
+    ? buildUnifiedChart(all, chartW, chartH, chartLayers)
     : '<div style="color:#fff;padding:20px">No hay registros todavía</div>';
 
   // Size the inner container
