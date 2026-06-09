@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606081354 -->
+<!-- v202606091241 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -69,6 +69,10 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 /* SUMMARY */
 .summary-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:14px;border:1px solid #ead8c8;box-shadow:0 2px 10px rgba(0,0,0,.04)}
 .section-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--mid);margin-bottom:10px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+.chart-header .chart-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mid)}
+.chart-header .chart-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-fullscreen{padding:5px 12px;border-radius:20px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--mid);cursor:pointer;white-space:nowrap}
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .stat{text-align:center}.stat .val{font-size:24px;font-weight:600;color:var(--accent);font-family:'Lora',serif}.stat .key{font-size:10px;color:var(--mid);margin-top:2px}
 
@@ -281,7 +285,7 @@ svg.chart{display:block;overflow:visible}
   <div id="view-historial" class="view">
     <div class="subtabs">
       <button class="subtab active" id="subtab-tabla" onclick="showSubview('tabla')">📋 Tabla</button>
-      <button class="subtab" id="subtab-grafico" onclick="showSubview('grafico')">📊 Gráfico</button>
+      <button class="subtab" id="subtab-grafico" onclick="showSubview('grafico')">📊 Gráficos</button>
     </div>
 
     <div id="subview-tabla" class="subview visible">
@@ -294,35 +298,50 @@ svg.chart{display:block;overflow:visible}
       <div class="chart-close-btn">
         <button onclick="exitFullChart()">✕ Cerrar</button>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap">
-        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
-            <input type="checkbox" id="tog-izq" checked onchange="toggleLayer('izq')">
-            <span style="width:8px;height:8px;border-radius:50%;background:#ffd84d;display:inline-block"></span>Izquierda
-          </label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
-            <input type="checkbox" id="tog-der" checked onchange="toggleLayer('der')">
-            <span style="width:8px;height:8px;border-radius:50%;background:#4de8a8;display:inline-block"></span>Derecha
-          </label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
-            <input type="checkbox" id="tog-bins" checked onchange="toggleLayer('bins')">
-            <span style="width:16px;height:2px;background:rgba(255,255,255,0.7);display:inline-block;vertical-align:middle;border-radius:1px"></span>Total/hora
-          </label>
-          <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
-            <input type="checkbox" id="tog-avg" checked onchange="toggleLayer('avg')">
-            <span style="width:8px;height:8px;border-radius:50%;background:rgba(255,200,80,0.9);display:inline-block"></span>Media
-          </label>
+      <div class="chart-header">
+        <span class="chart-title">Todos los registros</span>
+        <div class="chart-controls">
+          <button class="btn-fullscreen" onclick="enterFullChart()">⛶ Pantalla completa</button>
         </div>
-        <button onclick="enterFullChart()" style="padding:5px 12px;border-radius:20px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--mid);cursor:pointer;white-space:nowrap">⛶ Pantalla completa</button>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
+          <input type="checkbox" id="tog-izq" checked onchange="toggleLayer('izq')">
+          <span style="width:8px;height:8px;border-radius:50%;background:#ffd84d;display:inline-block"></span>Izquierda
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
+          <input type="checkbox" id="tog-der" checked onchange="toggleLayer('der')">
+          <span style="width:8px;height:8px;border-radius:50%;background:#4de8a8;display:inline-block"></span>Derecha
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
+          <input type="checkbox" id="tog-bins" checked onchange="toggleLayer('bins')">
+          <span style="width:16px;height:2px;background:rgba(255,255,255,0.7);display:inline-block;vertical-align:middle;border-radius:1px"></span>Total/hora
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
+          <input type="checkbox" id="tog-avg" checked onchange="toggleLayer('avg')">
+          <span style="width:8px;height:8px;border-radius:50%;background:rgba(255,200,80,0.9);display:inline-block"></span>Media
+        </label>
       </div>
       <div id="chart-fs-wrap">
         <div id="history-chart" style="width:100%"></div>
       </div>
 
       <div style="margin-top:20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--mid)">Día promedio</div>
-          <button onclick="enterFullChart2()" style="padding:5px 12px;border-radius:20px;border:1.5px solid #e0c8b0;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--mid);cursor:pointer;white-space:nowrap">⛶ Pantalla completa</button>
+        <div class="chart-header">
+          <span class="chart-title">Frecuencias características</span>
+          <div class="chart-controls">
+            <button class="btn-fullscreen" onclick="enterFullChartFFT()">⛶ Pantalla completa</button>
+          </div>
+        </div>
+        <div id="history-chart-fft" style="width:100%"></div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="chart-header">
+          <span class="chart-title">Día promedio</span>
+          <div class="chart-controls">
+            <button class="btn-fullscreen" onclick="enterFullChart2()">⛶ Pantalla completa</button>
+          </div>
         </div>
         <div id="history-chart2" style="width:100%"></div>
       </div>
@@ -344,6 +363,14 @@ svg.chart{display:block;overflow:visible}
   <button id="chart-modal-close2" onclick="exitFullChart2()" style="position:absolute;top:10px;right:10px;z-index:301;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
   <div id="chart-modal-inner2" style="position:absolute">
     <div id="chart-modal-content2"></div>
+  </div>
+</div>
+
+<!-- FULLSCREEN FFT MODAL -->
+<div id="chart-modal-fft" style="display:none;position:fixed;inset:0;z-index:300;background:#1a1c2e;overflow:hidden">
+  <button onclick="exitFullChartFFT()" style="position:absolute;top:10px;right:10px;z-index:301;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+  <div id="chart-modal-inner-fft" style="position:absolute">
+    <div id="chart-modal-content-fft"></div>
   </div>
 </div>
 
@@ -640,6 +667,7 @@ function byDateGroups(){
 function renderHistorial(){
   renderTable();
   renderChart();
+  renderChartFFT();
   renderChart2();
 }
 
@@ -1015,6 +1043,157 @@ function renderFullChart(){
   // Position so element center aligns with screen center
   inner.style.left = Math.round((sw - chartW) / 2) + 'px';
   inner.style.top  = Math.round((window.innerHeight - chartH) / 2) + 'px';
+}
+
+// ── fft chart ────────────────────────────────────────────────────
+function renderChartFFT(){
+  const all=load();
+  const container=document.getElementById('history-chart-fft');
+  if(!all.length){ container.innerHTML='<div class="empty">No hay registros todavía</div>'; return; }
+  container.innerHTML=buildFFTChart(all, window.innerWidth-28);
+}
+
+function enterFullChartFFT(){
+  document.getElementById('chart-modal-fft').style.display='block';
+  renderFullChartFFT();
+}
+function exitFullChartFFT(){
+  document.getElementById('chart-modal-fft').style.display='none';
+}
+function renderFullChartFFT(){
+  const sw=Math.min(window.screen.width,window.screen.height);
+  const chartW=Math.round(Math.max(window.screen.width,window.screen.height)*0.82);
+  const chartH=Math.round(sw*0.82);
+  const all=load();
+  const inner=document.getElementById('chart-modal-inner-fft');
+  const content=document.getElementById('chart-modal-content-fft');
+  content.innerHTML=all.length?buildFFTChart(all,chartW,chartH):'<div style="color:#fff;padding:20px">No hay datos</div>';
+  inner.style.width=chartW+'px'; inner.style.height=chartH+'px';
+  inner.style.transformOrigin='center center';
+  inner.style.transform='rotate(-90deg)';
+  inner.style.left=Math.round((sw-chartW)/2)+'px';
+  inner.style.top=Math.round((window.innerHeight-chartH)/2)+'px';
+}
+
+function buildFFTChart(sessions, containerW, containerH){
+  const VW=containerW||340;
+  const FORCE_H=containerH||null;
+  const YPAD_T=FORCE_H?28:8;
+  const YPAD_B=28;
+  const XPAD_L=FORCE_H?48:32;
+  const XPAD_R=14;
+  const PLOT_W=VW-XPAD_L-XPAD_R;
+  const PLOT_H=FORCE_H?FORCE_H-36:130;
+  const H=PLOT_H+YPAD_T+YPAD_B;
+  const AXIS_Y=YPAD_T+PLOT_H;
+
+  // Build per-day bins for complete days (24 valid bins)
+  const perDayBins={};
+  sessions.forEach(s=>{
+    const date=s.date;
+    if(!perDayBins[date]) perDayBins[date]={};
+    const t0=new Date(s.startTime).getTime();
+    const t1=new Date(s.endTime).getTime();
+    for(let h=0;h<24;h++){
+      const ss=new Date(s.startTime); ss.setHours(h,0,0,0);
+      const se=new Date(ss.getTime()+3600000);
+      const ss_ms=ss.getTime(), se_ms=se.getTime();
+      const overlap=(Math.min(t1,se_ms)-Math.max(t0,ss_ms))/60000;
+      if(overlap>0) perDayBins[date][h]=(perDayBins[date][h]||0)+overlap;
+    }
+  });
+
+  const allSorted=[...sessions].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+  const firstMs=new Date(allSorted[0].startTime).getTime();
+  const lastMs=new Date(allSorted[allSorted.length-1].endTime).getTime();
+
+  // Find complete days (all 24 bins valid)
+  const completeDays=Object.keys(perDayBins).sort().filter(date=>{
+    const [y,m,d]=date.split('-').map(Number);
+    let valid=0;
+    for(let h=0;h<24;h++){
+      const ss=new Date(y,m-1,d,h,0,0).getTime();
+      const se=ss+3600000;
+      if(se>firstMs && ss<lastMs) valid++;
+    }
+    return valid===24;
+  });
+
+  if(completeDays.length<1) return '<div class="empty" style="color:#a07850;padding:16px;text-align:center">No hay días completos para FFT</div>';
+
+  // Build signal
+  const signal=[];
+  completeDays.forEach(date=>{
+    for(let h=0;h<24;h++) signal.push(perDayBins[date][h]||0);
+  });
+
+  // FFT (real, via Cooley-Tukey approximation in JS)
+  const N=signal.length;
+  // DFT brute force (N<=72, fast enough)
+  const amps=[];
+  const periods=[];
+  for(let k=1;k<=Math.floor(N/2);k++){
+    let re=0,im=0;
+    for(let n=0;n<N;n++){
+      const angle=2*Math.PI*k*n/N;
+      re+=signal[n]*Math.cos(angle);
+      im-=signal[n]*Math.sin(angle);
+    }
+    const amp=Math.sqrt(re*re+im*im)/N*2;
+    const period=N/k; // in hours (since d=1h)
+    if(period<=24){ amps.push(amp); periods.push(period); }
+  }
+
+  const maxAmp=Math.max(...amps,1);
+  const BAR_W=Math.max(2,(PLOT_W/periods.length)*0.8);
+
+  function toX(p){ return XPAD_L+(p/24)*PLOT_W; }
+  function toY(a){ return YPAD_T+PLOT_H-(a/maxAmp)*PLOT_H; }
+
+  // Bars
+  let bars='';
+  amps.forEach((a,i)=>{
+    const x=toX(periods[i])-BAR_W/2;
+    const bh=(a/maxAmp)*PLOT_H;
+    const by=YPAD_T+PLOT_H-bh;
+    bars+=`<rect x="${x.toFixed(1)}" y="${by.toFixed(1)}" width="${BAR_W.toFixed(1)}" height="${bh.toFixed(1)}" rx="1" fill="#4de8a8" fill-opacity="0.7" stroke="#1ab87a" stroke-width="0.8"/>`;
+  });
+
+  // Top 3 labels
+  const topIdx=[...amps.keys()].sort((a,b)=>amps[b]-amps[a]).slice(0,3);
+  let labels='';
+  topIdx.forEach(i=>{
+    const x=toX(periods[i]);
+    const y=toY(amps[i])-4;
+    labels+=`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" font-size="8" fill="#ffd84d" font-family="DM Sans,sans-serif" font-weight="bold">${periods[i].toFixed(1)}h</text>`;
+  });
+
+  // Y grid
+  let yLines='',yLabels='';
+  const yStep=maxAmp<=5?1:maxAmp<=10?2:5;
+  for(let y=0;y<=maxAmp;y+=yStep){
+    const yPx=YPAD_T+PLOT_H-(y/maxAmp)*PLOT_H;
+    if(yPx<YPAD_T) break;
+    yLines+=`<line x1="${XPAD_L}" y1="${yPx.toFixed(1)}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${yPx.toFixed(1)}" stroke="${y===0?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.12)'}" stroke-width="${y===0?1.2:0.6}" stroke-dasharray="${y===0?'none':'3,3'}"/>`;
+    yLabels+=`<text x="${(XPAD_L-4).toFixed(1)}" y="${(yPx+3.5).toFixed(1)}" text-anchor="end" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${y.toFixed(1)}</text>`;
+  }
+  const yAxisLabel=`<text x="7" y="${(YPAD_T+PLOT_H/2).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif" transform="rotate(-90,7,${(YPAD_T+PLOT_H/2).toFixed(1)})">amp</text>`;
+
+  // X ticks at 1,2,3,4,6,8,12,24
+  let xTicks='';
+  [2,4,6,8,12,24].forEach(p=>{
+    const x=toX(p);
+    if(x<XPAD_L||x>XPAD_L+PLOT_W) return;
+    xTicks+=`<line x1="${x.toFixed(1)}" y1="${AXIS_Y}" x2="${x.toFixed(1)}" y2="${(AXIS_Y+4).toFixed(1)}" stroke="#c8b090" stroke-width="1"/>
+    <text x="${x.toFixed(1)}" y="${(AXIS_Y+13).toFixed(1)}" text-anchor="middle" font-size="8" fill="#a07850" font-family="DM Sans,sans-serif">${p}h</text>`;
+  });
+
+  const baseline=`<line x1="${XPAD_L}" y1="${AXIS_Y}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${AXIS_Y}" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>`;
+  const bgRect=`<rect x="${XPAD_L}" y="${YPAD_T}" width="${PLOT_W}" height="${PLOT_H}" fill="#16182a" rx="4"/>`;
+
+  return `<svg width="100%" viewBox="0 0 ${VW} ${H}" style="display:block;border-radius:8px">
+    ${bgRect}${yLines}${yLabels}${yAxisLabel}${bars}${labels}${baseline}${xTicks}
+  </svg>`;
 }
 
 // ── stacked day chart ────────────────────────────────────────────
