@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606100928 -->
+<!-- v202606100934 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -322,12 +322,12 @@ svg.chart{display:block;overflow:visible}
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
           <input type="checkbox" id="tog-bins" checked onchange="toggleLayer('bins')">
           <span style="width:16px;height:2px;background:rgba(255,255,255,0.7);display:inline-block;vertical-align:middle;border-radius:1px"></span>Total/h
-          <select id="bin-size" onchange="renderChart()" style="font-size:11px;border:1px solid #e0c8b0;border-radius:8px;padding:2px 4px;background:#fff;color:var(--mid);font-family:'DM Sans',sans-serif;cursor:pointer">
-            <option value="1">1h</option>
-            <option value="2" selected>2h</option>
-            <option value="3">3h</option>
-            <option value="4">4h</option>
-            <option value="6">6h</option>
+<select id="bin-size" onchange="renderChart()" style="font-size:11px;border:1px solid #e0c8b0;border-radius:8px;padding:2px 4px;background:#fff;color:var(--mid);font-family:'DM Sans',sans-serif;cursor:pointer">
+            <option value="1">σ=1h</option>
+            <option value="2" selected>σ=2h</option>
+            <option value="3">σ=3h</option>
+            <option value="4">σ=4h</option>
+            <option value="6">σ=6h</option>
           </select>
         </label>
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--brown);cursor:pointer">
@@ -907,39 +907,51 @@ function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverri
     return { cx: toX(midT), cy: YPAD_T+PLOT_H-toBarH(s.duration), side: s.side, dur: s.duration };
   });
 
-  // Binned totals — bin size in hours (default 2)
-  const BH = binH || 2;
-  const BMS = BH * 3600000;
-  const binMap = {};
+  // 1h bins always
+  const HRS = 3600000;
+  const rawBins = {};
   sorted.forEach(s => {
     const t0 = new Date(s.startTime).getTime();
     const t1 = new Date(s.endTime).getTime();
     if(t1 <= t0) return;
-    const b0 = Math.floor(t0 / BMS);
-    const b1 = Math.floor((t1 - 1) / BMS);
-    for(let b = b0; b <= b1; b++){
-      const slotStart = b * BMS;
-      const slotEnd   = (b + 1) * BMS;
-      const overlap = Math.min(t1, slotEnd) - Math.max(t0, slotStart);
-      binMap[b] = (binMap[b] || 0) + overlap / 60000;
+    const h0 = Math.floor(t0 / HRS);
+    const h1 = Math.floor((t1 - 1) / HRS);
+    for(let h = h0; h <= h1; h++){
+      const overlap = Math.min(t1,(h+1)*HRS) - Math.max(t0,h*HRS);
+      rawBins[h] = (rawBins[h] || 0) + overlap / 60000;
     }
   });
 
-  const firstB = Math.floor(tStart / BMS);
-  const lastB  = Math.floor((tEnd - 1) / BMS);
-  const maxBin = Math.max(...Object.values(binMap), 1);
+  const firstB = Math.floor(tStart / HRS);
+  const lastB  = Math.floor((tEnd - 1) / HRS);
+
+  // Gaussian kernel smoothing
+  const sigma = binH || 2; // in hours
+  const kRadius = Math.ceil(sigma * 3);
+  const smoothed = {};
+  for(let b = firstB; b <= lastB; b++){
+    let sum = 0, wSum = 0;
+    for(let k = -kRadius; k <= kRadius; k++){
+      const w = Math.exp(-(k*k) / (2*sigma*sigma));
+      sum  += (rawBins[b+k] || 0) * w;
+      wSum += w;
+    }
+    smoothed[b] = sum / wSum;
+  }
+
+  const maxBin = Math.max(...Object.values(smoothed), 1);
 
   const binPts = [];
   for(let b = firstB; b <= lastB; b++){
-    const midMs = b * BMS + BMS / 2;
+    const midMs = b * HRS + HRS / 2;
     const bx = Math.max(XPAD_L, Math.min(XPAD_L + PLOT_W, toX(new Date(midMs).toISOString())));
-    const val = binMap[b] || 0;
+    const val = smoothed[b] || 0;
     const by = YPAD_T + PLOT_H - (val / maxBin) * PLOT_H * 0.85;
     binPts.push({ x: bx, y: by });
   }
 
   // Step-filled path (like matplotlib steps): no gaps between bins
-  const hourW = PLOT_W / Math.max(1, lastB - firstB + 1);
+  const hourW = PLOT_W / Math.max(1, lastB - firstB + 1); // 1h bins
   let spline = '';
   if(L.bins && binPts.length >= 1){
     // Each bin occupies [p.x - hourW/2, p.x + hourW/2]
