@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606100239 -->
+<!-- v202606100257 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -30,8 +30,10 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 .tab{padding:6px 13px;border-radius:20px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;background:transparent;color:var(--mid);transition:all .2s}
 .tab.active{background:var(--accent);color:#fff}
 
-.main{max-width:480px;margin:0 auto;padding:16px 14px}
-.view{display:none}.view.visible{display:block}
+.main{max-width:480px;margin:0 auto;overflow:hidden;position:relative}
+.carousel-track{display:flex;width:100%;transition:transform 0.28s cubic-bezier(.25,.46,.45,.94);will-change:transform}
+.carousel-slide{min-width:100%;padding:18px 14px;box-sizing:border-box;flex-shrink:0}
+.view{}.view.visible{}
 
 /* SUBTABS (historial) */
 .subtabs{display:flex;gap:6px;margin-bottom:16px}
@@ -95,7 +97,7 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 
 /* DAY GROUP */
 .day-group{margin-bottom:18px}
-.day-label{font-size:11px;font-weight:600;text-transform:capitalize;letter-spacing:.5px;color:var(--mid);padding:4px 2px 8px;border-bottom:1px solid #e8d8c8;margin-bottom:8px}
+.day-label{font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--mid);padding:4px 2px 8px;border-bottom:1px solid #e8d8c8;margin-bottom:8px}
 
 /* MANUAL BTN */
 .manual-btn{width:100%;padding:10px;border-radius:12px;border:1.5px dashed var(--accent);background:transparent;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;margin-bottom:14px}
@@ -215,10 +217,11 @@ svg.chart{display:block;overflow:visible}
   </div>
 </header>
 
-<div class="main">
+<div class="main" id="main-content">
+  <div class="carousel-track" id="carousel-track">
 
   <!-- HOY -->
-  <div id="view-hoy" class="view visible">
+  <div id="view-hoy" class="carousel-slide view visible">
     <div id="active-card">
       <div class="row">
         <div>
@@ -262,17 +265,17 @@ svg.chart{display:block;overflow:visible}
       <div class="summary-card" id="ayer-card">
         <div class="section-label">Ayer</div>
         <div class="stats" style="grid-template-columns:1fr 1fr 1fr 1fr">
-          <div class="stat"><div class="val" id="stat-ayer-tomas">0</div><div class="key">Tomas</div></div>
-          <div class="stat"><div class="val" id="stat-ayer-total">0</div><div class="key">Min</div></div>
-          <div class="stat"><div class="val" id="stat-ayer-min">0</div><div class="key">Min/toma</div></div>
-          <div class="stat"><div class="val" id="stat-ayer-mph">0</div><div class="key">Min/h</div></div>
+          <div class="stat"><div class="val" id="stat-ayer-tomas">0</div><div class="key">tomas</div></div>
+          <div class="stat"><div class="val" id="stat-ayer-total">0</div><div class="key">min</div></div>
+          <div class="stat"><div class="val" id="stat-ayer-min">0</div><div class="key">min/toma</div></div>
+          <div class="stat"><div class="val" id="stat-ayer-mph">0</div><div class="key">min/h</div></div>
         </div>
       </div>
       <div class="summary-card mini">
         <div class="section-label">Global</div>
         <div class="stats" style="grid-template-columns:1fr 1fr">
-          <div class="stat"><div class="val" id="stat-global-avg" style="font-size:20px">0</div><div class="key">Min/toma</div></div>
-          <div class="stat"><div class="val" id="stat-global-mph" style="font-size:20px">0</div><div class="key">Min/h</div></div>
+          <div class="stat"><div class="val" id="stat-global-avg" style="font-size:20px">0</div><div class="key">min/toma</div></div>
+          <div class="stat"><div class="val" id="stat-global-mph" style="font-size:20px">0</div><div class="key">min/h</div></div>
         </div>
       </div>
     </div>
@@ -285,7 +288,7 @@ svg.chart{display:block;overflow:visible}
   </div>
 
   <!-- HISTORIAL -->
-  <div id="view-historial" class="view">
+  <div id="view-historial" class="carousel-slide view">
     <div class="subtabs">
       <button class="subtab active" id="subtab-tabla" onclick="showSubview('tabla')">📋 Tabla</button>
       <button class="subtab" id="subtab-grafico" onclick="showSubview('grafico')">📊 Gráficos</button>
@@ -351,6 +354,7 @@ svg.chart{display:block;overflow:visible}
     </div>
   </div>
 
+  </div><!-- end carousel-track -->
 </div>
 
 <!-- FULLSCREEN CHART MODAL -->
@@ -426,8 +430,9 @@ function todayStr(){ return localDateStr(new Date()); }
 function fmtTime(iso){ const d=new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
 function fmtDate(str){
   const [y,m,d]=str.split('-');
-  return new Date(Number(y),Number(m)-1,Number(d))
+  const s=new Date(Number(y),Number(m)-1,Number(d))
     .toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+  return s.charAt(0).toUpperCase()+s.slice(1);
 }
 function durStr(sec){ return `${pad(Math.floor(sec/60))}:${pad(sec%60)}`; }
 function totalMin(list){ return Math.round(list.reduce((a,s)=>a+(s.duration||0),0)/60); }
@@ -978,11 +983,23 @@ function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverri
 
 
 // ── views ─────────────────────────────────────────────────────────
-function showView(name){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('visible'));
-  document.getElementById('view-'+name).classList.add('visible');
+const VIEWS = ['hoy','historial'];
+function showView(name, animate){
+  const idx = VIEWS.indexOf(name);
+  if(idx === -1) return;
+  curIdx = idx;
+  const track = document.getElementById('carousel-track');
+  if(animate === false){
+    track.style.transition = 'none';
+    track.style.transform = `translateX(-${idx*100}%)`;
+  } else {
+    // Let CSS transition handle it
+    track.style.transform = `translateX(-${idx*100}%)`;
+  }
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('visible'));
+  document.getElementById('view-'+name).classList.add('visible');
   if(name==='historial') renderHistorial();
 }
 
@@ -1421,6 +1438,69 @@ function buildStackedChart(sessions, containerW, containerH){
     ${svgDefs2}${bgRect2}${yLines}${yLabels}${yAxisLabel}${stepPath}${avgLine}${baseline}${xTicks}
   </svg>`;
 }
+
+// ── swipe carousel ───────────────────────────────────────────────
+let curIdx = 0;
+(function(){
+  const el  = document.getElementById('main-content');
+  const track = document.getElementById('carousel-track');
+  let x0 = null, dragging = false, startTx = 0;
+
+  function getTx(){ return -curIdx * 100; } // in %
+
+  let y0 = null, locked = null; // locked: 'h' horizontal, 'v' vertical
+
+  el.addEventListener('touchstart', e => {
+    x0 = e.touches[0].clientX;
+    y0 = e.touches[0].clientY;
+    startTx = getTx();
+    locked = null;
+    dragging = true;
+    track.style.transition = 'none';
+  }, {passive:true});
+
+  el.addEventListener('touchmove', e => {
+    if(!dragging || x0 === null) return;
+    const dx = e.touches[0].clientX - x0;
+    const dy = e.touches[0].clientY - y0;
+    // Determine lock direction on first significant move
+    if(!locked && (Math.abs(dx) > 8 || Math.abs(dy) > 8)){
+      locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+    }
+    if(locked !== 'h') return; // vertical scroll wins
+    e.preventDefault();
+    const W = el.offsetWidth || window.innerWidth;
+    const rawPct = startTx + (dx / W * 100);
+    const min = -(VIEWS.length-1)*100, max = 0;
+    let pct;
+    if(rawPct > max){
+      // rubber band past start
+      pct = max + (rawPct - max) * 0.18;
+    } else if(rawPct < min){
+      // rubber band past end
+      pct = min + (rawPct - min) * 0.18;
+    } else {
+      pct = rawPct;
+    }
+    track.style.transform = `translateX(${pct}%)`;
+  }, {passive:false});
+
+  el.addEventListener('touchend', e => {
+    if(!dragging) return;
+    dragging = false;
+    if(locked === 'h'){
+      const dx = e.changedTouches[0].clientX - x0;
+      if(dx < -60 && curIdx < VIEWS.length-1) curIdx++;
+      else if(dx > 60 && curIdx > 0) curIdx--;
+    }
+    x0 = null; y0 = null; locked = null;
+    // Springy snap back
+    track.style.transition = 'transform 0.38s cubic-bezier(.175,.885,.32,1.15)';
+    requestAnimationFrame(() => {
+      showView(VIEWS[curIdx]);
+    });
+  }, {passive:true});
+})();
 
 // ── init ──────────────────────────────────────────────────────────
 // Restore in-progress session if app was closed mid-toma
