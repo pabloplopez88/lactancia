@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606100945 -->
+<!-- v202606100951 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -936,11 +936,13 @@ function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverri
     for(let b = firstB; b <= lastB; b++){
       let sum = 0, wSum = 0;
       for(let k = -kRadius; k <= kRadius; k++){
+        const nb = b + k;
+        if(nb < firstB || nb > lastB) continue; // only sum over existing bins
         const w = Math.exp(-(k*k) / (2*sigma*sigma));
-        sum  += (rawBins[b+k] || 0) * w;
+        sum  += (rawBins[nb] || 0) * w;
         wSum += w;
       }
-      smoothed[b] = sum / wSum;
+      smoothed[b] = wSum > 0 ? sum / wSum : 0;
     }
   }
 
