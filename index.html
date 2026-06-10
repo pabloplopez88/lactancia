@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606100942 -->
+<!-- v202606100945 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -944,7 +944,7 @@ function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverri
     }
   }
 
-  const maxBin = Math.max(...Object.values(smoothed), 1);
+  const maxBin = Math.max(...Object.values(rawBins), 1); // fixed to raw so suavizado shows amplitude decay
 
   const binPts = [];
   for(let b = firstB; b <= lastB; b++){
