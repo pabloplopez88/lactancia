@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606100934 -->
+<!-- v202606100942 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -323,6 +323,7 @@ svg.chart{display:block;overflow:visible}
           <input type="checkbox" id="tog-bins" checked onchange="toggleLayer('bins')">
           <span style="width:16px;height:2px;background:rgba(255,255,255,0.7);display:inline-block;vertical-align:middle;border-radius:1px"></span>Total/h
 <select id="bin-size" onchange="renderChart()" style="font-size:11px;border:1px solid #e0c8b0;border-radius:8px;padding:2px 4px;background:#fff;color:var(--mid);font-family:'DM Sans',sans-serif;cursor:pointer">
+            <option value="0">sin suavizado</option>
             <option value="1">σ=1h</option>
             <option value="2" selected>σ=2h</option>
             <option value="3">σ=3h</option>
@@ -925,18 +926,22 @@ function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverri
   const firstB = Math.floor(tStart / HRS);
   const lastB  = Math.floor((tEnd - 1) / HRS);
 
-  // Gaussian kernel smoothing
-  const sigma = binH || 2; // in hours
-  const kRadius = Math.ceil(sigma * 3);
+  // Gaussian kernel smoothing (sigma=0 means no smoothing)
+  const sigma = (binH !== null && binH !== undefined) ? binH : 2;
   const smoothed = {};
-  for(let b = firstB; b <= lastB; b++){
-    let sum = 0, wSum = 0;
-    for(let k = -kRadius; k <= kRadius; k++){
-      const w = Math.exp(-(k*k) / (2*sigma*sigma));
-      sum  += (rawBins[b+k] || 0) * w;
-      wSum += w;
+  if(sigma === 0){
+    for(let b = firstB; b <= lastB; b++) smoothed[b] = rawBins[b] || 0;
+  } else {
+    const kRadius = Math.ceil(sigma * 3);
+    for(let b = firstB; b <= lastB; b++){
+      let sum = 0, wSum = 0;
+      for(let k = -kRadius; k <= kRadius; k++){
+        const w = Math.exp(-(k*k) / (2*sigma*sigma));
+        sum  += (rawBins[b+k] || 0) * w;
+        wSum += w;
+      }
+      smoothed[b] = sum / wSum;
     }
-    smoothed[b] = sum / wSum;
   }
 
   const maxBin = Math.max(...Object.values(smoothed), 1);
