@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606100229 -->
+<!-- v202606100239 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -537,8 +537,14 @@ function renderActive(){
 function renderHint(){
   const s=load(); const hint=document.getElementById('hint-text');
   if(!s.length){ hint.textContent=''; return; }
-  const last=s[0].side;
-  hint.innerHTML=`Última: ${last==='izquierda'?'⬅️':'➡️'} ${last} · <strong>Próxima: ${last==='izquierda'?'➡️ derecha':'⬅️ izquierda'}</strong>`;
+  const last10=s.slice(0,10);
+  const minIzq=last10.filter(x=>x.side==='izquierda').reduce((a,x)=>a+(x.duration||0),0);
+  const minDer=last10.filter(x=>x.side==='derecha').reduce((a,x)=>a+(x.duration||0),0);
+  const suggested=minIzq<=minDer?'izquierda':'derecha';
+  const sugMin=suggested==='izquierda'?minIzq:minDer;
+  const totMin=minIzq+minDer;
+  const sugMinR=Math.round(sugMin/60), totMinR=Math.round(totMin/60);
+  hint.innerHTML=`<span style="font-size:15px"><strong>Próxima sugerida: ${suggested==='izquierda'?'⬅️ izquierda':'➡️ derecha'}</strong></span><br><span style="font-weight:normal;font-size:13px">(${sugMinR} de ${totMinR} min, ult. 10)</span>`;
 }
 
 // ── shared stats ─────────────────────────────────────────────────
