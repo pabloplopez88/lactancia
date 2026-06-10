@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606100221 -->
+<!-- v202606100229 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -277,7 +277,10 @@ svg.chart{display:block;overflow:visible}
       </div>
     </div>
 
-    <div class="section-label" id="today-label" style="margin-bottom:8px">Tomas de hoy</div>
+    <div style="margin-bottom:8px">
+      <div class="section-label" style="margin-bottom:3px">Tomas de hoy</div>
+      <div id="today-stats-line" style="font-size:11px;color:var(--mid)"></div>
+    </div>
     <div id="today-list" class="sessions-list"></div>
   </div>
 
@@ -543,7 +546,7 @@ function dayStatsLine(list, dateStr){
   if(!list.length) return '';
   const n=list.length;
   const tot=Math.round(list.reduce((a,s)=>a+(s.duration||0),0)/60);
-  const avg=Math.round(tot/n);
+  const avg=tot/n;
   let mph='—';
   if(dateStr){
     const today=todayStr();
@@ -557,7 +560,7 @@ function dayStatsLine(list, dateStr){
       mph=(tot/24).toFixed(1);
     }
   }
-  return `${n} tomas · ${tot} min · ${avg} min/toma · ${mph} min/h`;
+  return `${n} tomas · ${tot} min · ${avg.toFixed(1)} min/toma · ${mph} min/h`;
 }
 
 // ── today ─────────────────────────────────────────────────────────
@@ -571,12 +574,15 @@ function renderToday(){
   // Ayer
   const ay=all.filter(s=>s.date===ayer);
   const ayerCard=document.getElementById('ayer-card');
-  // Global avg min/day
-  const allDays=[...new Set(all.map(s=>s.date))];
-  const globalAvg=all.length
-    ? Math.round(all.reduce((a,s)=>a+(s.duration||0),0)/60/all.length)
-    : 0;
+  // Global stats
+  const allTotMin=all.reduce((a,s)=>a+(s.duration||0),0)/60;
+  const globalAvg=all.length?(allTotMin/all.length).toFixed(1):'—';
   document.getElementById('stat-global-avg').textContent=globalAvg;
+  const allSortedG=[...all].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+  const globalMph=allSortedG.length
+    ? (allTotMin/((Date.now()-new Date(allSortedG[0].startTime).getTime())/3600000)).toFixed(1)
+    : '—';
+  document.getElementById('stat-global-mph').textContent=globalMph;
 
   const summaryRow=document.getElementById('summary-row');
   if(ay.length){
@@ -585,7 +591,7 @@ function renderToday(){
     const ayMph=(ayTot/24).toFixed(1);
     document.getElementById('stat-ayer-tomas').textContent=ay.length;
     document.getElementById('stat-ayer-total').textContent=ayTot;
-    document.getElementById('stat-ayer-min').textContent=ay.length?Math.round(ayTot/ay.length):0;
+    document.getElementById('stat-ayer-min').textContent=ay.length?(ayTot/ay.length).toFixed(1):0;
     document.getElementById('stat-ayer-mph').textContent=ayMph;
   } else {
     // Show only global avg even when no ayer data
@@ -599,11 +605,9 @@ function renderToday(){
   const list=document.getElementById('today-list');
   list.innerHTML=ts.length?ts.map(sessionHTML).join(''):'<div class="empty">Todavía no hay tomas registradas hoy 🌙</div>';
 
-  // Today label with stats
+  // Today stats line
   const line=dayStatsLine(ts, todayStr());
-  document.getElementById('today-label').textContent=line
-    ? 'Tomas de hoy · '+line
-    : 'Tomas de hoy';
+  document.getElementById('today-stats-line').textContent=line;
   renderProxima();
 }
 
