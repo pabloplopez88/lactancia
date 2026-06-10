@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606101017 -->
+<!-- v202606101032 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1109,41 +1109,23 @@ function exitFullChart(){
 
 function renderFullChart(){
   const sw = Math.min(window.screen.width, window.screen.height);
-  const sh = Math.max(window.screen.width, window.screen.height);
-  // chartW = landscape width (long side), chartH = landscape height (short side)
-  const chartW = Math.round(sh * 0.82);
+  const chartW = Math.round(Math.max(window.screen.width, window.screen.height) * 0.82);
   const chartH = Math.round(sw * 0.82);
-
   const all = load();
   const inner = document.getElementById('chart-modal-inner');
   const content = document.getElementById('chart-modal-content');
   const bh = document.getElementById('bin-size') ? parseInt(document.getElementById('bin-size').value) : 2;
-
-  if(!all.length){
-    content.innerHTML = '<div style="color:#fff;padding:20px">No hay registros todavía</div>';
-  } else {
-    // Build scrollable chart: 5 days visible = chartW pixels
-    const sorted = [...all].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
-    const tStart = new Date(sorted[0].startTime).getTime();
-    const tEnd   = new Date(sorted[sorted.length-1].endTime).getTime();
-    const totalDays = (tEnd - tStart) / 86400000;
-    const totalW = Math.max(chartW, Math.round(totalDays * (chartW / 5)));
-
-    // SVG is totalW wide x chartH tall
-    const chartSVG = buildUnifiedChart(all, totalW, chartH, chartLayers, 48, 28, bh);
-    content.innerHTML = chartSVG;
-  }
-
-  // inner: chartW wide x chartH tall — after rotate(-90deg) it becomes chartH wide x chartW tall on screen
-  inner.style.width    = chartW + 'px';
-  inner.style.height   = chartH + 'px';
-  inner.style.overflowX = 'auto';
-  inner.style.overflowY = 'hidden';
+  content.innerHTML = all.length
+    ? buildUnifiedChart(all, chartW, chartH, chartLayers, 48, 28, bh)
+    : '<div style="color:#fff;padding:20px">No hay registros todavía</div>';
+  inner.style.width  = chartW + 'px';
+  inner.style.height = chartH + 'px';
+  inner.style.overflowX = '';
+  inner.style.overflowY = '';
   inner.style.transformOrigin = 'center center';
   inner.style.transform = 'rotate(-90deg)';
   inner.style.left = Math.round((sw - chartW) / 2) + 'px';
   inner.style.top  = Math.round((window.innerHeight - chartH) / 2) + 'px';
-  setTimeout(()=>{ inner.scrollLeft = inner.scrollWidth; }, 80);
 }
 
 // ── fft chart ────────────────────────────────────────────────────
@@ -1496,6 +1478,15 @@ let curIdx = 0;
   let y0 = null, locked = null; // locked: 'h' horizontal, 'v' vertical
 
   el.addEventListener('touchstart', e => {
+    // If touch starts inside a horizontally scrollable element, don't hijack
+    let node = e.target;
+    while(node && node !== el){
+      const st = window.getComputedStyle(node);
+      if((st.overflowX === 'auto' || st.overflowX === 'scroll') && node.scrollWidth > node.clientWidth){
+        x0 = null; return; // let the inner scroll handle it
+      }
+      node = node.parentElement;
+    }
     x0 = e.touches[0].clientX;
     y0 = e.touches[0].clientY;
     startTx = getTx();
