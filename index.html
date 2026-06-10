@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606100957 -->
+<!-- v202606101017 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -31,8 +31,8 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 .tab.active{background:var(--accent);color:#fff}
 
 .main{max-width:480px;margin:0 auto;position:relative}
-.carousel-outer{overflow:hidden;width:100%}.carousel-track{display:flex;width:100%;transition:transform 0.28s cubic-bezier(.25,.46,.45,.94);will-change:transform}
-.carousel-slide{min-width:100%;padding:18px 14px;box-sizing:border-box;flex-shrink:0}
+.carousel-outer{overflow-x:clip;overflow-y:visible;width:100%}.carousel-track{display:flex;transition:transform 0.28s cubic-bezier(.25,.46,.45,.94);will-change:transform}
+.carousel-slide{min-width:100vw;max-width:100vw;padding:18px 14px;box-sizing:border-box;flex-shrink:0}
 .view{}.view.visible{}
 
 /* SUBTABS (historial) */
@@ -123,6 +123,8 @@ header h1{font-family:'Lora',serif;font-size:22px;font-weight:400;color:var(--br
 .chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .chart-wrap{position:relative;padding-left:36px;padding-bottom:22px}
 svg.chart{display:block;overflow:visible}
+#history-chart-scroll{border-radius:8px}
+#history-chart-scroll:active{cursor:grabbing}
 /* fullscreen chart modal */
 #chart-modal {
   display: none;
@@ -338,7 +340,9 @@ svg.chart{display:block;overflow:visible}
         </label>
       </div>
       <div id="chart-fs-wrap">
-        <div id="history-chart" style="width:100%"></div>
+        <div id="history-chart-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;cursor:grab;max-width:100%;width:100%">
+          <div id="history-chart"></div>
+        </div>
       </div>
 
       <div style="margin-top:20px">
@@ -748,16 +752,30 @@ function toggleLayer(key){
 
 function renderChart(){
   const all=load();
+  const scrollWrap=document.getElementById('history-chart-scroll');
   const container=document.getElementById('history-chart');
   if(!all.length){ container.innerHTML='<div class="empty">No hay registros todavía</div>'; return; }
-  const isLandscape=document.getElementById('subview-grafico').classList.contains('landscape-mode');
-  // In landscape fullscreen, the long side of the screen is the chart width
-  // Use actual rendered container width for accuracy
-  const wrap = document.getElementById('chart-fs-wrap') || container;
-  const w = isLandscape ? Math.round(Math.max(window.screen.width, window.screen.height) * 0.95) : (window.innerWidth - 28);
+
   const binSel=document.getElementById('bin-size');
   const bh=binSel?parseInt(binSel.value):2;
-  container.innerHTML=buildUnifiedChart(all, w, null, chartLayers, null, null, bh);
+
+  // Total data span → scale so 3 days = screen width
+  const sorted=[...all].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+  const tStart=new Date(sorted[0].startTime).getTime();
+  const tEnd=new Date(sorted[sorted.length-1].endTime).getTime();
+  const totalDays=(tEnd-tStart)/86400000;
+  const viewW=window.innerWidth-28;
+  const pxPerDay=viewW/3;
+  const totalW=Math.max(viewW, Math.round(totalDays*pxPerDay));
+
+  container.style.width=totalW+'px';
+  container.innerHTML=buildUnifiedChart(all, totalW, null, chartLayers, null, null, bh);
+
+  // Scroll to most recent on first load
+  if(scrollWrap && scrollWrap.dataset.init!=='1'){
+    setTimeout(()=>{ scrollWrap.scrollLeft=scrollWrap.scrollWidth; },50);
+    scrollWrap.dataset.init='1';
+  }
 }
 
 function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverride, yPadTOverride, binH){
@@ -1090,40 +1108,42 @@ function exitFullChart(){
 }
 
 function renderFullChart(){
-  // Screen short side = portrait width, long side = portrait height
-  const sw = Math.min(window.screen.width, window.screen.height);  // e.g. 390
-  const sh = Math.max(window.screen.width, window.screen.height);  // e.g. 844
-
-  // The chart will be drawn at sh wide × sw tall, then rotated -90deg
+  const sw = Math.min(window.screen.width, window.screen.height);
+  const sh = Math.max(window.screen.width, window.screen.height);
+  // chartW = landscape width (long side), chartH = landscape height (short side)
   const chartW = Math.round(sh * 0.82);
   const chartH = Math.round(sw * 0.82);
 
   const all = load();
   const inner = document.getElementById('chart-modal-inner');
   const content = document.getElementById('chart-modal-content');
+  const bh = document.getElementById('bin-size') ? parseInt(document.getElementById('bin-size').value) : 2;
 
-  content.innerHTML = all.length
-    ? buildUnifiedChart(all, chartW, chartH, chartLayers, 48, 28, (document.getElementById('bin-size')?parseInt(document.getElementById('bin-size').value):2))
-    : '<div style="color:#fff;padding:20px">No hay registros todavía</div>';
+  if(!all.length){
+    content.innerHTML = '<div style="color:#fff;padding:20px">No hay registros todavía</div>';
+  } else {
+    // Build scrollable chart: 5 days visible = chartW pixels
+    const sorted = [...all].sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+    const tStart = new Date(sorted[0].startTime).getTime();
+    const tEnd   = new Date(sorted[sorted.length-1].endTime).getTime();
+    const totalDays = (tEnd - tStart) / 86400000;
+    const totalW = Math.max(chartW, Math.round(totalDays * (chartW / 5)));
 
-  // Size the inner container
-  inner.style.width  = chartW + 'px';
-  inner.style.height = chartH + 'px';
+    // SVG is totalW wide x chartH tall
+    const chartSVG = buildUnifiedChart(all, totalW, chartH, chartLayers, 48, 28, bh);
+    content.innerHTML = chartSVG;
+  }
 
-  // Rotate -90deg around top-left, then translate so it sits inside the screen
-  // After -90deg rotation around (0,0): the box ends up at x:[0, chartH], y:[-chartW, 0]
-  // We want it at x:[0, sw], y:[0, sh] → translate(0, chartW)
-  // After rotate(-90deg) around top-left:
-  // rotated box occupies: x:[0, chartH], y:[-chartW, 0] (off screen upward)
-  // To center: shift right by (sw-chartH)/2, shift down by (sh+chartW)/2... 
-  // Easier: rotate around center of the element, then position centered on screen
-  // After rotate(-90deg) around center: box occupies chartH wide x chartW tall
-  // Center on screen: left = (sw-chartH)/2, top = (sh-chartW)/2
+  // inner: chartW wide x chartH tall — after rotate(-90deg) it becomes chartH wide x chartW tall on screen
+  inner.style.width    = chartW + 'px';
+  inner.style.height   = chartH + 'px';
+  inner.style.overflowX = 'auto';
+  inner.style.overflowY = 'hidden';
   inner.style.transformOrigin = 'center center';
   inner.style.transform = 'rotate(-90deg)';
-  // Position so element center aligns with screen center
   inner.style.left = Math.round((sw - chartW) / 2) + 'px';
   inner.style.top  = Math.round((window.innerHeight - chartH) / 2) + 'px';
+  setTimeout(()=>{ inner.scrollLeft = inner.scrollWidth; }, 80);
 }
 
 // ── fft chart ────────────────────────────────────────────────────
