@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606101749 -->
+<!-- v202606101752 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -539,7 +539,7 @@ function renderActive(){
     card.className=activeSession.side==='izquierda'?'left':'right';
     card.id='active-card'; card.style.display='block';
     document.getElementById('active-label').textContent=
-      activeSession.side==='izquierda'?'⬅️ Teta izquierda':'➡️ Teta derecha';
+      activeSession.side==='izquierda'?'Teta izquierda':'Teta derecha';
     document.getElementById('active-start').textContent='Inicio: '+fmtTime(activeSession.startTime);
     document.getElementById('timer-display').textContent=durStr(elapsedSec());
     startArea.style.display='none';
