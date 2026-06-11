@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606101752 -->
+<!-- v202606110703 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -653,8 +653,8 @@ function renderProxima(){
     if(overlap>0) minsIn2h+=overlap/60000;
   });
 
-  // Fixed reference: 10 min/h → expected in 3h = 30 min
-  const expected=30;
+  // Fixed reference: 8 min/h → expected in 3h = 24 min
+  const expected=24;
 
   // time = 3h * minsIn2h / expected, clamped [1h, 3h]
   const ratio=expected>0?minsIn2h/expected:0;
