@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606190141 -->
+<!-- v202606190230 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -985,7 +985,8 @@ function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverri
     }
   }
 
-  const maxBin = Math.max(...Object.values(rawBins), 1); // fixed to raw so suavizado shows amplitude decay
+  // Step chart Y axis = same as dots (yMax=20 min = 20 min/h for 1h bins)
+  const maxBin = yMax;
 
   const binPts = [];
   for(let b = firstB; b <= lastB; b++){
