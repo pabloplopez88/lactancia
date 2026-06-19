@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606110703 -->
+<!-- v202606190141 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -819,7 +819,7 @@ function buildUnifiedChart(sessions, containerW, containerH, layers, xPadLOverri
 
   // Y axis: max duration in minutes
   const maxDurMin = Math.max(...sessions.map(s=>s.duration/60), 5);
-  const yMax = Math.ceil(maxDurMin/5)*5;
+  const yMax = 20;
 
   function toX(iso){
     return XPAD_L + ((new Date(iso).getTime()-tStart)/tSpan)*PLOT_W;
