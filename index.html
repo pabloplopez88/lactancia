@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606280427 -->
+<!-- v202606280428 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1486,7 +1486,7 @@ function buildStackedChart(sessions, containerW, containerH, sigma){
   const avgYpx = (YPAD_T + PLOT_H - (globalAvgPerBin / maxBin) * PLOT_H * 0.85).toFixed(1);
   const avgLine = avgYpx >= YPAD_T && avgYpx <= AXIS_Y
     ? `<line x1="${XPAD_L}" y1="${avgYpx}" x2="${(XPAD_L+PLOT_W).toFixed(1)}" y2="${avgYpx}" stroke="rgba(255,255,255,0.7)" stroke-width="1" stroke-dasharray="4,3"/>
-       <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgYpx)+3).toFixed(1)}" font-size="7.5" fill="rgba(255,255,255,0.8)" font-family="DM Sans,sans-serif">x̄${globalAvgPerHour.toFixed(1)}m</text>`
+       <text x="${(XPAD_L+PLOT_W+2).toFixed(1)}" y="${(Number(avgYpx)+3).toFixed(1)}" font-size="7.5" fill="rgba(255,255,255,0.8)" font-family="DM Sans,sans-serif">x̄${((globalAvgPerBin/BIN_MIN)*60).toFixed(1)}m</text>`
     : '';
 
   // Background gradient 0-24h
