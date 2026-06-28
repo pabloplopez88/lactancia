@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606271615 -->
+<!-- v202606280427 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1370,29 +1370,22 @@ function buildStackedChart(sessions, containerW, containerH, sigma){
     return XPAD_L + (hourFloat / 24) * PLOT_W;
   }
 
-  // Build per-day, per-hour bins
-  // For each session, find which hour slots it covers and accumulate
-  const perDayBins = {}; // date -> { hour: minutes }
+  // Build per-day bins using 20min slots (72 per day)
+  const BIN_MIN = 20;
+  const N_BINS = 72;
+  const perDayBins = {};
   sessions.forEach(s => {
-    const t0 = new Date(s.startTime);
-    const t1 = new Date(s.endTime);
     const date = s.date;
     if(!perDayBins[date]) perDayBins[date] = {};
-    // Walk hour slots
-    const h0 = t0.getHours();
-    const h1 = t1.getHours();
-    const ms0 = t0.getTime();
-    const ms1 = t1.getTime();
-    for(let h = h0; h <= h1; h++){
-      const slotStart = new Date(t0); slotStart.setHours(h,0,0,0);
-      const slotEnd   = new Date(t0); slotEnd.setHours(h+1 > 23 ? 23 : h+1, h+1>23?59:0, h+1>23?59:0, h+1>23?999:0);
-      // Handle h==23 specially
-      const slotEndMs = h < 23
-        ? new Date(t0.getFullYear(), t0.getMonth(), t0.getDate(), h+1, 0, 0).getTime()
-        : new Date(t0.getFullYear(), t0.getMonth(), t0.getDate(), 23, 59, 59, 999).getTime();
-      const slotStartMs = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate(), h, 0, 0).getTime();
-      const overlap = (Math.min(ms1, slotEndMs) - Math.max(ms0, slotStartMs)) / 60000;
-      if(overlap > 0) perDayBins[date][h] = (perDayBins[date][h] || 0) + overlap;
+    const ms0 = new Date(s.startTime).getTime();
+    const ms1 = new Date(s.endTime).getTime();
+    const [y,mo,d] = date.split('-').map(Number);
+    const dayStart = new Date(y,mo-1,d,0,0,0).getTime();
+    for(let b=0; b<N_BINS; b++){
+      const ss_ms = dayStart + b * BIN_MIN * 60000;
+      const se_ms = ss_ms + BIN_MIN * 60000;
+      const overlap = (Math.min(ms1,se_ms) - Math.max(ms0,ss_ms)) / 60000;
+      if(overlap > 0) perDayBins[date][b] = (perDayBins[date][b] || 0) + overlap;
     }
   });
 
