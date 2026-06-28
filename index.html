@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606280438 -->
+<!-- v202606280440 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1447,7 +1447,8 @@ function buildStackedChart(sessions, containerW, containerH, sigma){
     }
   }
 
-  const maxBin = Math.max(...Object.values(avgBins), 1);
+  // Fix maxBin to raw max so Y scale is stable across sigma changes
+  const maxBin = Math.max(...Object.values(rawAvg), 1);
 
   // Build step path (20min bins)
   const binW = PLOT_W / N_BINS;
