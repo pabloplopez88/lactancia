@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606280440 -->
+<!-- v202606280447 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1429,22 +1429,17 @@ function buildStackedChart(sessions, containerW, containerH, sigma){
     const kR = Math.ceil(sigmaBins * 3);
     let wTotal = 0;
     for(let k=-kR; k<=kR; k++) wTotal += Math.exp(-(k*k)/(2*sigmaBins*sigmaBins));
+    // Circular convolution — wrap around at day boundaries
     for(let b=firstB2; b<=lastB2; b++){
       let s=0;
       for(let k=-kR; k<=kR; k++){
-        const nb=b+k;
-        const val=(nb>=firstB2 && nb<=lastB2) ? (rawAvg[nb]||0) : 0;
-        s += val * Math.exp(-(k*k)/(2*sigmaBins*sigmaBins));
+        // Wrap index circularly within [0, N_BINS-1]
+        const nb = ((b+k) % N_BINS + N_BINS) % N_BINS;
+        s += (rawAvg[nb]||0) * Math.exp(-(k*k)/(2*sigmaBins*sigmaBins));
       }
       avgBins[b] = s / wTotal;
     }
-    // Rescale to conserve integral exactly
-    const rawSum = Object.values(rawAvg).reduce((a,v)=>a+v, 0);
-    const smoothSum = Object.values(avgBins).reduce((a,v)=>a+v, 0);
-    if(smoothSum > 0){
-      const scale = rawSum / smoothSum;
-      Object.keys(avgBins).forEach(b => avgBins[b] *= scale);
-    }
+    // No rescaling needed: circular convolution conserves sum exactly
   }
 
   // Fix maxBin to raw max so Y scale is stable across sigma changes
