@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v202606280428 -->
+<!-- v202606280438 -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1319,7 +1319,8 @@ function renderChart2(){
   const container = document.getElementById('history-chart2');
   if(!all.length){ container.innerHTML='<div class="empty">No hay registros todavía</div>'; return; }
   const w = window.innerWidth - 28;
-  container.innerHTML = buildStackedChart(all, w);
+  const sig = parseFloat(document.getElementById('bin2-sigma')?.value ?? 1);
+  container.innerHTML = buildStackedChart(all, w, null, sig);
 }
 
 function enterFullChart2(){
@@ -1421,19 +1422,28 @@ function buildStackedChart(sessions, containerW, containerH, sigma){
   const firstB2 = Math.min(...validBins);
   const lastB2  = Math.max(...validBins);
   if(sigma === 0){
-    validBins.forEach(b => avgBins[b] = rawAvg[b]);
+    for(let b=firstB2; b<=lastB2; b++) avgBins[b] = rawAvg[b] || 0;
   } else {
+    // True convolution (not weighted average) — preserves integral
+    // Normalize kernel so sum of all weights = 1
     const kR = Math.ceil(sigmaBins * 3);
+    let wTotal = 0;
+    for(let k=-kR; k<=kR; k++) wTotal += Math.exp(-(k*k)/(2*sigmaBins*sigmaBins));
     for(let b=firstB2; b<=lastB2; b++){
-      if(rawAvg[b] === undefined) continue;
-      let s=0, w=0;
+      let s=0;
       for(let k=-kR; k<=kR; k++){
         const nb=b+k;
-        if(nb<firstB2||nb>lastB2||rawAvg[nb]===undefined) continue;
-        const wk=Math.exp(-(k*k)/(2*sigmaBins*sigmaBins));
-        s+=rawAvg[nb]*wk; w+=wk;
+        const val=(nb>=firstB2 && nb<=lastB2) ? (rawAvg[nb]||0) : 0;
+        s += val * Math.exp(-(k*k)/(2*sigmaBins*sigmaBins));
       }
-      avgBins[b] = w>0 ? s/w : 0;
+      avgBins[b] = s / wTotal;
+    }
+    // Rescale to conserve integral exactly
+    const rawSum = Object.values(rawAvg).reduce((a,v)=>a+v, 0);
+    const smoothSum = Object.values(avgBins).reduce((a,v)=>a+v, 0);
+    if(smoothSum > 0){
+      const scale = rawSum / smoothSum;
+      Object.keys(avgBins).forEach(b => avgBins[b] *= scale);
     }
   }
 
